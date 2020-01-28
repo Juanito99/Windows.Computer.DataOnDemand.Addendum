@@ -2,22 +2,31 @@
 The MP named Windows.Computer.DataOnDemand.Addendum provides different kinds of Agent Tasks for direct use in the SCOM console or in a Dashboard Tool.
 
 
+
 ### Get-ComputerDescription:
 Retrieves the computer's local description and the one from the Active Directory computer object. 
 ![Get-ComputerDescription](https://raw.githubusercontent.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/master/PicturesForGitWebSite/Get-ComputerDescription.png)
 
-### Inventory View:
-![Solar_Inventory](https://raw.githubusercontent.com/Juanito99/SolarWinds_NPM_OpsMgr/master/PicturesForGitWebSite/SolarOpsMgr_InvView.png)
 
-### State Views:
-![Solar_State](https://raw.githubusercontent.com/Juanito99/SolarWinds_NPM_OpsMgr/master/PicturesForGitWebSite/SolarOpsMgr_StateView.png)
+### Get-ComputerLastChanges:
+Retrieves the computer's local description and the one from the Active Directory computer object. 
+![Get-ComputerLastChanges](https://raw.githubusercontent.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/master/PicturesForGitWebSite/Get-ComputerLastChanges.png)
 
-### Diagram Views:
-![Solar_Diagram](https://raw.githubusercontent.com/Juanito99/SolarWinds_NPM_OpsMgr/master/PicturesForGitWebSite/SolarOpsMgr_DiagramView.png)
+
+### Get-SCOMNotificaitonConfiguration:
+Displays the SCOM's notification configuration incl. subscription, subscribers, channel, etc. 
+-> Task works only if selecting a Management Server!
+![Get-SCOMNotificaitonConfiguration](https://raw.githubusercontent.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/master/PicturesForGitWebSite/Get-SCOMNotificaitonConfiguration.png)
+
+
+### Get-RemoteSOAPServiceInfo:
+Queries a remote web service via SOAP / XML displays its data; before RESTful became standard, web services could be consumed via SOAP.
+![Get-RemoteSOAPServiceInfo](https://raw.githubusercontent.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/master/PicturesForGitWebSite/Get-RemoteSOAPServiceInfo.png)
 
 
 ### More information on:
-[Documentation](https://github.com/Juanito99/SolarWinds_NPM_OpsMgr/blob/master/Documentation/Integrate_SolarWinds_NPM_into_OpsMgr.pdf)
+[Documentation](https://raw.githubusercontent.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/master/Documentation/DataOnDemandAddendum_ManagementPack_for_WindowsComputers.pdf))
+
 
 
 ### Downloads:
@@ -27,8 +36,6 @@ Retrieves the computer's local description and the one from the Active Directory
 [ManagementPack-UnSealed](https://github.com/Juanito99/SolarWinds_NPM_OpsMgr/blob/master/ABC.Network.SolarWinds.NPM/ABC.Network.SolarWinds.NPM/bin/Release/ABC.Network.SolarWinds.NPM.mpb) 
 
 [Source for VSAE 2015](https://github.com/Juanito99/SolarWinds_NPM_OpsMgr/tree/master/ABC.Network.SolarWinds.NPM)
-
-
 
 
 
