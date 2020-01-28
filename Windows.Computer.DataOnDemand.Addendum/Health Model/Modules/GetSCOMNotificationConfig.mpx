@@ -1,0 +1,119 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <TypeDefinitions>
+    <ModuleTypes>
+
+      <WriteActionModuleType ID="Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.WriteAction" Accessibility="Public" Batching="false">
+        <Configuration>
+          <xsd:element name="Format" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="TimeoutSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="HideDisabled" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="HideChannelInfo" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="AddVisualizationFlag" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="SortedByColumn" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+        </Configuration>
+        <OverrideableParameters>
+          <OverrideableParameter ID="Format" Selector="$Config/Format$" ParameterType="string" />
+          <OverrideableParameter ID="TimeoutSeconds" Selector="$Config/TimeoutSeconds$" ParameterType="int" />
+          <OverrideableParameter ID="HideDisabled" Selector="$Config/HideDisabled$" ParameterType="string" />
+          <OverrideableParameter ID="HideChannelInfo" Selector="$Config/HideChannelInfo$" ParameterType="string" />
+          <OverrideableParameter ID="AddVisualizationFlag" Selector="$Config/AddVisualizationFlag$" ParameterType="string" />
+          <OverrideableParameter ID="SortedByColumn" Selector="$Config/SortedByColumn$" ParameterType="string" />
+        </OverrideableParameters>
+        <ModuleImplementation Isolation="Any">
+          <Composite>
+            <MemberModules>
+              <WriteAction ID="PowerShellWriteAction" TypeID="Windows!Microsoft.Windows.PowerShellWriteAction">
+                <ScriptName>Get-SCOMNotificationConfig.ps1</ScriptName>
+                <ScriptBody>$IncludeFileContent/Health Model/Scripts/Get-SCOMNotificationConfig.ps1$</ScriptBody>
+                <Parameters>
+                  <Parameter>
+                    <Name>Format</Name>
+                    <Value>$Config/Format$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>HideDisabled</Name>
+                    <Value>$Config/HideDisabled$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>HideChannelInfo</Name>
+                    <Value>$Config/HideChannelInfo$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>AddVisualizationFlag</Name>
+                    <Value>$Config/AddVisualizationFlag$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>SortedByColumn</Name>
+                    <Value>$Config/SortedByColumn$</Value>
+                  </Parameter>
+                </Parameters>
+                <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
+              </WriteAction>
+            </MemberModules>
+            <Composition>
+              <Node ID="PowerShellWriteAction" />
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>System!System.BaseData</OutputType>
+        <InputType>System!System.BaseData</InputType>
+      </WriteActionModuleType>
+
+    </ModuleTypes>
+  </TypeDefinitions>
+
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.WriteAction" >
+          <Name>
+            Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.WriteAction
+          </Name>
+          <Description>
+            Displays the SCOM's notification configuration incl. subscription, subscribers, channel, etc.
+            This task works ONLY if targeting SCOM Management Server!
+            
+            Note: JSON format is only supported if PowerShell v3 or later is installed on the target server.
+          </Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.WriteAction" SubElementID="Format">
+          <Name>Output format</Name>
+          <Description>Allowed values: JSON, Text, List</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.WriteAction" SubElementID="TimeoutSeconds">
+          <Name>Timeout (Seconds)</Name>
+          <Description>Script timeout in seconds</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.WriteAction" SubElementID="HideDisabled">
+          <Name>HideDisabled</Name>
+          <Description>Hides disabled subscriptions [true|false] (default = true)</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.WriteAction" SubElementID="HideChannelInfo">
+          <Name>HideChannelInfo</Name>
+          <Description>Hides Channel Information [true|false] (default = true)</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.WriteAction" SubElementID="AddVisualizationFlag">
+          <Name>AddVisualizationFlag</Name>
+          <Description>Adds a ## (double hashtag) at the beginning of every 2nd entry so that nice formatting can be performed</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.WriteAction" SubElementID="SortedByColumn">
+          <Name>SortedByColumn</Name>
+          <Description>Sorts according to the field specified. (E.g. Description, DisplayName, RecptInfo, Criteria, Enabled </Description>
+        </DisplayString>
+
+      </DisplayStrings>
+
+      <KnowledgeArticles></KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+
+</ManagementPackFragment>  
+

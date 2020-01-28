@@ -1,4 +1,4 @@
-## Data on Demand Addendum Management Pack for Windows Computers
+## Data On Demand Addendum - Management Pack for Windows Computers
 The MP named Windows.Computer.DataOnDemand.Addendum provides different kinds of Agent Tasks for direct use in the SCOM console or in a Dashboard Tool.
 
 
@@ -15,7 +15,7 @@ Retrieves the computer's local description and the one from the Active Directory
 
 ### Get-SCOMNotificaitonConfiguration:
 Displays the SCOM's notification configuration incl. subscription, subscribers, channel, etc. 
--> Task works only if selecting a Management Server!
+Task works only if selecting a Management Server!
 ![Get-SCOMNotificaitonConfiguration](https://raw.githubusercontent.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/master/PicturesForGitWebSite/Get-SCOMNotificaitonConfiguration.png)
 
 

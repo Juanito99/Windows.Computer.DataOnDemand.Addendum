@@ -1,0 +1,72 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <TypeDefinitions>
+    <ModuleTypes>
+
+      <WriteActionModuleType ID="Windows.Computer.DataOnDemand.Addendum.GetComputerLastChanges.WriteAction" Accessibility="Public" Batching="false">
+        <Configuration>
+          <xsd:element name="Format" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="TimeoutSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+        </Configuration>
+        <OverrideableParameters>
+          <OverrideableParameter ID="Format" Selector="$Config/Format$" ParameterType="string" />
+          <OverrideableParameter ID="TimeoutSeconds" Selector="$Config/TimeoutSeconds$" ParameterType="int" />
+        </OverrideableParameters>
+        <ModuleImplementation Isolation="Any">
+          <Composite>
+            <MemberModules>
+              <WriteAction ID="PowerShellWriteAction" TypeID="Windows!Microsoft.Windows.PowerShellWriteAction">
+                <ScriptName>Get-ComputerLastChanges.ps1</ScriptName>
+                <ScriptBody>$IncludeFileContent/Health Model/Scripts/Get-ComputerLastChanges.ps1$</ScriptBody>
+                <Parameters>
+                  <Parameter>
+                    <Name>Format</Name>
+                    <Value>$Config/Format$</Value>
+                  </Parameter>
+                </Parameters>
+                <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
+              </WriteAction>
+            </MemberModules>
+            <Composition>
+              <Node ID="PowerShellWriteAction" />
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>System!System.BaseData</OutputType>
+        <InputType>System!System.BaseData</InputType>
+      </WriteActionModuleType>
+
+    </ModuleTypes>
+  </TypeDefinitions>
+
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetComputerLastChanges.WriteAction" >
+          <Name>
+            Windows.Computer.DataOnDemand.Addendum.GetComputerLastChanges.WriteAction
+          </Name>
+          <Description>
+            Displays the computers' last changes; last installed software, logged on user, etc.
+            Note: JSON format is only supported if PowerShell v3 or later is installed on the target server.
+          </Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetComputerLastChanges.WriteAction" SubElementID="Format">
+          <Name>Output format</Name>
+          <Description>Allowed values: JSON, Text, List</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetComputerLastChanges.WriteAction" SubElementID="TimeoutSeconds">
+          <Name>Timeout (Seconds)</Name>
+          <Description>Script timeout in seconds</Description>
+        </DisplayString>
+
+      </DisplayStrings>
+
+      <KnowledgeArticles></KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+
+</ManagementPackFragment>

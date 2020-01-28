@@ -1,0 +1,1067 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ManagementPack SchemaVersion="2.0" ContentReadable="true" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Manifest>
+    <Identity>
+      <ID>Windows.Computer.DataOnDemand.Addendum</ID>
+      <Version>1.0.0.93</Version>
+    </Identity>
+    <Name>Windows.Computer.DataOnDemand.Addendum</Name>
+    <References>
+      <Reference Alias="Windows">
+        <ID>Microsoft.Windows.Library</ID>
+        <Version>7.5.8501.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="System">
+        <ID>System.Library</ID>
+        <Version>7.5.8501.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+    </References>
+  </Manifest>
+  <TypeDefinitions>
+    <ModuleTypes>
+      <WriteActionModuleType ID="Windows.Computer.DataOnDemand.Addendum.GetComputerDescription.WriteAction" Accessibility="Public" Batching="false">
+        <Configuration>
+          <xsd:element name="Format" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="TimeoutSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+        </Configuration>
+        <OverrideableParameters>
+          <OverrideableParameter ID="Format" Selector="$Config/Format$" ParameterType="string" />
+          <OverrideableParameter ID="TimeoutSeconds" Selector="$Config/TimeoutSeconds$" ParameterType="int" />
+        </OverrideableParameters>
+        <ModuleImplementation Isolation="Any">
+          <Composite>
+            <MemberModules>
+              <WriteAction ID="PowerShellWriteAction" TypeID="Windows!Microsoft.Windows.PowerShellWriteAction">
+                <ScriptName>Get-ComputerDescription.ps1</ScriptName>
+                <ScriptBody><![CDATA[<#
+.SYNOPSIS
+    Get Compupter Description
+.DESCRIPTION
+    This script gets the local description and the one from Active Directory
+.Notes
+	AUTHOR: Ruben Zimmermann @ruben8z
+	LASTEDIT: 2019-12-25
+	REQUIRES: PowerShell Version 2, Windows Management Foundation 4, At least Windows 7 or Windows Server 2008 R2.	
+REMARK:
+This PS script comes with ABSOLUTELY NO WARRANTY; for details see gnu-gpl. This is free software, and you are welcome to redistribute it under certain conditions; see gnu-gpl for details.
+    
+#>
+Param(
+    [ValidateSet("text","csv","json", "list")]
+    [string] $Format = "csv"
+)
+
+
+$ErrorActionPreference = "stop"
+
+try {
+	$computerDescription = Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\services\LanmanServer\Parameters | Select-Object -ExpandProperty srvcomment -ErrorAction Stop
+} catch {
+	$foo = 'swallowException'
+}
+
+if (([string]::IsNullOrEmpty($computerDescription))) {
+	$computerDescription = 'Not-Maintained'
+} else {
+	$computerDescription = $computerDescription.Trim()
+	$noActionRequired  = 'Keep description'
+}
+
+
+$objADSearcher = New-Object System.DirectoryServices.DirectorySearcher
+$objADSearcher.Filter = "(&(objectCategory=computer)(cn=$env:computername))"
+$myComputerInAD = $objADSearcher.FindOne()
+$myComputerInADAllProps = $myComputerInAD | Select-Object -ExpandProperty Properties
+
+try {
+  [string]$myComputerInADDescritpion = $myComputerInADAllProps.Item('description')
+  [string]$myComputerInWhenCreated = $myComputerInADAllProps.Item('whenCreated')
+} catch {
+  $foo = 'swallowException'
+}
+
+
+if (([string]::IsNullOrEmpty($myComputerInADDescritpion))) {
+	$myComputerInADDescritpion = 'Not-Maintained'
+} else {
+	$noActionRequired  = 'Keep description'
+	$myComputerInADDescritpion = $myComputerInADDescritpion.Trim()
+}
+
+ 
+if (([string]::IsNullOrEmpty($myComputerInWhenCreated))) {
+	$myComputerInWhenCreated = 'Not-Queryable'
+} else {
+	$noActionRequired  = 'Keep Information'
+	$myComputerInWhenCreated = $myComputerInWhenCreated.Trim()
+}
+
+$myComputerDescHash = @{'Local Computer Description' = $computerDescription}
+$myComputerDescHash.Add('AD Computer Description', $myComputerInADDescritpion)
+$myComputerDescHash.Add('AD Computer CreationDate', $myComputerInWhenCreated)
+$myComputerDescObj = New-Object -TypeName PSObject -Property $myComputerDescHash
+
+if ($Format -eq 'text') {
+	$myComputerDescObj | Format-Table -AutoSize | Out-String -Width 4096 | Write-Host
+} elseif ($Format -eq 'csv') {
+    $myComputerDescObj | ConvertTo-Csv -NoTypeInformation | Out-String -Width 4096 | Write-Host
+} elseif ($Format -eq 'json') {
+    $myComputerDescObj | ConvertTo-Json | Out-String -Width 4096 | Write-Host
+} elseif ($format -eq 'list') {
+    $myComputerDescObj | Format-List | Out-String -Width 4096 | Write-Host
+}
+
+# Done. (do not remove blank line following this comment as it can cause problems when script is sent to SCOM agent!)
+]]></ScriptBody>
+                <Parameters>
+                  <Parameter>
+                    <Name>Format</Name>
+                    <Value>$Config/Format$</Value>
+                  </Parameter>
+                </Parameters>
+                <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
+              </WriteAction>
+            </MemberModules>
+            <Composition>
+              <Node ID="PowerShellWriteAction" />
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>System!System.BaseData</OutputType>
+        <InputType>System!System.BaseData</InputType>
+      </WriteActionModuleType>
+      <WriteActionModuleType ID="Windows.Computer.DataOnDemand.Addendum.GetComputerLastChanges.WriteAction" Accessibility="Public" Batching="false">
+        <Configuration>
+          <xsd:element name="Format" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="TimeoutSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+        </Configuration>
+        <OverrideableParameters>
+          <OverrideableParameter ID="Format" Selector="$Config/Format$" ParameterType="string" />
+          <OverrideableParameter ID="TimeoutSeconds" Selector="$Config/TimeoutSeconds$" ParameterType="int" />
+        </OverrideableParameters>
+        <ModuleImplementation Isolation="Any">
+          <Composite>
+            <MemberModules>
+              <WriteAction ID="PowerShellWriteAction" TypeID="Windows!Microsoft.Windows.PowerShellWriteAction">
+                <ScriptName>Get-ComputerLastChanges.ps1</ScriptName>
+                <ScriptBody><![CDATA[<#
+.SYNOPSIS
+    Get Compupter Last Changes
+.DESCRIPTION
+    This script gets some last changes such as last installed SW or logged on user.
+.Notes
+	AUTHOR: Ruben Zimmermann @ruben8z
+	LASTEDIT: 2019-12-25
+	REQUIRES: PowerShell Version 2, Windows Management Foundation 4, At least Windows 7 or Windows Server 2008 R2.	
+REMARK:
+This PS script comes with ABSOLUTELY NO WARRANTY; for details see gnu-gpl. This is free software, and you are welcome to redistribute it under certain conditions; see gnu-gpl for details.
+    
+#>
+Param(
+    [ValidateSet("text","csv","json", "list")]
+    [string] $Format = "csv"
+)
+
+
+$ErrorActionPreference = "stop"
+
+
+$regPat         = '[0-9]{8}'
+$bootInfo       = wmic os get lastbootuptime
+$bootDateNumber = Select-String -InputObject $bootInfo -Pattern $regPat | Select-Object -ExpandProperty Matches | Select-Object -ExpandProperty Value
+$bootDate       = ([DateTime]::ParseExact($bootDateNumber,'yyyyMMdd',[Globalization.CultureInfo]::InvariantCulture))
+$lastBootTime   = $bootDate | Get-Date -Format 'yyyy-MM-dd'
+
+$timeSpan       = New-TimeSpan -Start $lastBootTime -End (Get-Date)
+$UpTimeInDays   = [math]::Round($timeSpan.TotalDays,1)
+
+		
+$soft32All       = Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | Where-Object {$_.Publisher -notlike "*Microsoft*" } | Select-Object DisplayName, Publisher, InstallDate
+$soft32Filtered  = $soft32All | Select-Object DisplayName, Publisher, @{Name='RealDate';Expression={([DateTime]::ParseExact($_.InstallDate,'yyyyMMdd',[Globalization.CultureInfo]::InvariantCulture)) `
+							  | Get-Date -Format 'yyyy-MM-dd'}}   
+
+$lastInstalled32Sofware             = $soft32Filtered | Sort-Object -Property RealDate -Descending | Select-Object -First 1
+$lastInstalled32SoftwareInstallDate = $lastInstalled32Sofware.RealDate | Get-Date -Format 'yyyy-MM-dd'
+$lastInstalled32SoftwareName        = $lastInstalled32Sofware.DisplayName
+  
+$soft64All       = Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Where-Object {$_.Publisher -notlike "*Microsoft*" } | `
+									Select-Object DisplayName, Publisher, InstallDate
+
+$soft64Filtered  = $soft64All | Select-Object DisplayName, Publisher, @{Name='RealDate';Expression={([DateTime]::ParseExact($_.InstallDate,'yyyyMMdd',[Globalization.CultureInfo]::InvariantCulture)) `
+							  | Get-Date -Format 'yyyy-MM-dd'}}   
+
+$lastInstalled64Sofware              = $soft64Filtered | Sort-Object -Property RealDate -Descending | Select-Object -First 1
+$lastInstalled64SoftwareInstallDate  = $lastInstalled64Sofware.RealDate | Get-Date -Format 'yyyy-MM-dd'
+$lastInstalled64SoftwareName         = $lastInstalled64Sofware.DisplayName
+  
+if ($lastInstalled32SoftwareInstallDate -gt $lastInstalled64SoftwareInstallDate) {
+	$lastInstalledSoftwareInstallDate = $lastInstalled32SoftwareInstallDate
+	$lastInstalledSoftwareName        = $lastInstalled32SoftwareName		
+} else {
+	$lastInstalledSoftwareInstallDate = $lastInstalled64SoftwareInstallDate
+	$lastInstalledSoftwareName        = $lastInstalled64SoftwareName		
+}		
+
+
+$regPat                         = 'KB[0-9]{7}'
+$Session                        = New-Object -ComObject "Microsoft.Update.Session"
+$Searcher                       = $Session.CreateUpdateSearcher()
+$historyCount                   = $Searcher.GetTotalHistoryCount()
+$allHotfixes                    = $Searcher.QueryHistory(0, $historyCount) | Select-Object Date, @{Name='KBNo';Expression={(Select-String -InputObject $_.Title -Pattern $regPat | Select-Object -ExpandProperty Matches | Select-Object -ExpandProperty Value)}}
+$lastHotfix                     = $allHotfixes | Sort-Object -Descending -Property Date | Sort-Object -Descending -Property KBNo | Select-Object -First 1
+
+$lastInstalledHotfixInstallDate = $lastHotfix.Date | Get-Date -Format 'yyyy-MM-dd'
+$lastInstalledHotfixName        = $lastHotfix.KBNo
+
+
+$noOfDaysDiff = (New-TimeSpan -Start $lastBootTime -End $lastInstalledHotfixInstallDate).Days
+if($noOfDaysDiff -gt 1) {
+	$patchBootPending = "Yes, for $noOfDaysDiff Days"
+} else {
+	$patchBootPending = "No."
+}	
+
+
+$profilesDir          = Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList' | Select-Object -ExpandProperty ProfilesDirectory
+$lastLoggedOnInfo     = Get-ChildItem -Path $profilesDir | Select-Object Name, LastWriteTime | Sort-Object -Property LastwriteTime -Descending | Select-Object -First 1
+$lastLoggedOnUserId   = $($lastLoggedOnInfo.Name).ToUpper()
+$lastLoggedOnUserDate = $lastLoggedOnInfo.LastWriteTime | Get-Date -Format 'yyyy-MM-dd'
+
+
+
+$myComputerDescHash = @{'Last Boot / UpTime (days)' = $($lastBootTime + ' / ' + $UpTimeInDays)}
+$myComputerDescHash.Add('Last Interactive Logon', $($lastLoggedOnUserId + ' / ' + $lastLoggedOnUserDate))
+$myComputerDescHash.Add('Last Software Install', $($lastInstalledSoftwareName + ' / ' + $lastInstalledSoftwareInstallDate))
+$myComputerDescHash.Add('Last Hotfix Install', $($lastInstalledHotfixName + ' / ' + $lastInstalledHotfixInstallDate))
+$myComputerDescHash.Add('Patch-Boot pending', $($patchBootPending))
+
+$myComputerDescObj = New-Object -TypeName PSObject -Property $myComputerDescHash
+
+
+if ($Format -eq 'text') {
+    $myComputerDescObj | Format-Table -AutoSize | Out-String -Width 4096 | Write-Host
+} elseif ($Format -eq 'csv') {
+    $myComputerDescObj | ConvertTo-Csv -NoTypeInformation | Out-String -Width 4096 | Write-Host
+} elseif ($Format -eq 'json') {
+    $myComputerDescObj | ConvertTo-Json | Out-String -Width 4096 | Write-Host
+} elseif ($format -eq 'list') {
+    $myComputerDescObj | Format-List | Out-String -Width 4096 | Write-Host
+}
+
+# Done. (do not remove blank line following this comment as it can cause problems when script is sent to SCOM agent!)
+]]></ScriptBody>
+                <Parameters>
+                  <Parameter>
+                    <Name>Format</Name>
+                    <Value>$Config/Format$</Value>
+                  </Parameter>
+                </Parameters>
+                <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
+              </WriteAction>
+            </MemberModules>
+            <Composition>
+              <Node ID="PowerShellWriteAction" />
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>System!System.BaseData</OutputType>
+        <InputType>System!System.BaseData</InputType>
+      </WriteActionModuleType>
+      <WriteActionModuleType ID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" Accessibility="Public" Batching="false">
+        <Configuration>
+          <xsd:element name="Format" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="TimeoutSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="WebServiceUrl" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="ContentType" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="Headers" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="XMLNodeName" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="UserName" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="PassWord" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="SortedByXMLNode" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="FilterForXMLNode" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="AddVisualizationFlag" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+        </Configuration>
+        <OverrideableParameters>
+          <OverrideableParameter ID="Format" Selector="$Config/Format$" ParameterType="string" />
+          <OverrideableParameter ID="TimeoutSeconds" Selector="$Config/TimeoutSeconds$" ParameterType="int" />
+          <OverrideableParameter ID="WebServiceUrl" Selector="$Config/WebServiceUrl$" ParameterType="string" />
+          <OverrideableParameter ID="ContentType" Selector="$Config/ContentType$" ParameterType="string" />
+          <OverrideableParameter ID="Headers" Selector="$Config/Headers$" ParameterType="string" />
+          <OverrideableParameter ID="XMLNodeName" Selector="$Config/XMLNodeName$" ParameterType="string" />
+          <OverrideableParameter ID="UserName" Selector="$Config/UserName$" ParameterType="string" />
+          <OverrideableParameter ID="PassWord" Selector="$Config/PassWord$" ParameterType="string" />
+          <OverrideableParameter ID="SortedByXMLNode" Selector="$Config/SortedByXMLNode$" ParameterType="string" />
+          <OverrideableParameter ID="FilterForXMLNode" Selector="$Config/FilterForXMLNode$" ParameterType="string" />
+          <OverrideableParameter ID="AddVisualizationFlag" Selector="$Config/AddVisualizationFlag$" ParameterType="string" />
+        </OverrideableParameters>
+        <ModuleImplementation Isolation="Any">
+          <Composite>
+            <MemberModules>
+              <WriteAction ID="PowerShellWriteAction" TypeID="Windows!Microsoft.Windows.PowerShellWriteAction">
+                <ScriptName>Get-RemoteSOAPServiceInfo</ScriptName>
+                <ScriptBody><![CDATA[<#
+.SYNOPSIS
+    Get Compupter Updatime
+.DESCRIPTION
+    This script enumerates processes and outputs formatted text
+.Notes
+	AUTHOR: Ruben Zimmermann @ruben8z
+	LASTEDIT: 2020-01-22
+	REQUIRES: PowerShell Version 2, Windows Management Foundation 4, At least Windows 7 or Windows Server 2008 R2.	
+REMARK:
+This PS script comes with ABSOLUTELY NO WARRANTY; for details see gnu-gpl. This is free software, and you are welcome to redistribute it under certain conditions; see gnu-gpl for details.
+    
+#>
+Param(
+    [ValidateSet('text','list','json')]
+    [string]$Format = "json",
+	[string]$WebServiceUrl,
+	[string]$ContentType = 'application/soap+xml',
+	[string]$Headers,
+	[string]$XMLNodeName,
+	[string]$UserName,
+	[string]$PassWord,
+	[string]$SortedByXMLNode,
+	[string]$FilterForXMLNode,
+	[string] $addVisualizationFlag = 'true'	
+)
+
+
+$api = New-Object -ComObject 'MOM.ScriptAPI'
+
+#region PREWORK Disabling the certificate validations
+if ("TrustAllCertsPolicy" -as [type]) {
+	$foo = 'already exist'
+} else {
+add-type -TypeDefinition @"
+    using System.Net;
+    using System.Security.Cryptography.X509Certificates;
+    public class TrustAllCertsPolicy : ICertificatePolicy {
+        public bool CheckValidationResult(
+            ServicePoint srvPoint, X509Certificate certificate,
+            WebRequest request, int certificateProblem) {
+            return true;
+        }
+    }
+"@
+[Net.ServicePointManager]::CertificatePolicy = New-Object -TypeName TrustAllCertsPolicy
+}
+#endregion PREWORK
+
+$ErrorActionPreference = "stop"
+$rtnMsg = ''
+
+if ($WebServiceUrl -match "(?i)http(s)?") {
+	$foo = 'proceed'
+} else {
+	$rtnMsg = 'WebService not matching URL' + $WebServiceUrl
+}
+
+if ($ContentType -match "(?i)application|soap|xml") {
+	$foo = 'proceed'
+} else {
+	$rtnMsg = 'ContentType not matching URL' + $WebServiceUrl
+}
+
+if ($XMLNodeName -match "'\//.?'") {
+	$foo = 'proceed'
+} else {
+	$XMLNodeName = '//' + $XMLNodeName 
+}
+
+if ($FilterForXMLNode -match "{}") {
+	$FilterForXMLNode = $FilterForXMLNode -replace ('{|}','')
+} else {
+	$foo = 'bar'
+}
+
+
+$api.LogScriptEvent('Get-RemoteSOAPServiceInfo.ps1',602,1,"URL $($WebServiceUrl), User $($UserName + $PassWord)  Contenttype $($ContentType) FilterForXMLNode $FilterForXMLNode Sortby $SortedByXMLNode")
+
+
+<#
+if ($Headers -match '\//.?') {
+	$foo = 'proceed'
+} else {
+	$rtnMsg = 'WebService not matching URL' + $WebServiceUrl
+}
+
+HEADER verification and handling is still required, now just focus on PI.
+SortedByXMLNode
+#>
+
+
+$header   = @{"Authorization" = "Basic "+[System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($UserName+":"+ $PassWord))}
+
+try {
+	
+	$reqAnsw = Invoke-WebRequest -Uri $WebServiceUrl -UseBasicParsing -Headers $header -ContentType $ContentType
+	
+} catch {
+	
+	$rtnMsg = 'Failure during InvokeWebRequest' + $Error.ToString()
+}
+
+[xml]$content = $reqAnsw.Content
+$elementList  = $content.DocumentElement.SelectNodes($XMLNodeName)
+
+$allElements = New-Object -TypeName 'System.Collections.Generic.List[PSObject]'
+
+$elementList | ForEach-Object {
+  
+	$tmpString = $_ | Out-String  
+	$tmpEntry  = $tmpString -Split("`r`n")  
+	$tmpObj    = New-Object -TypeName PSObject
+
+	$tmpEntry | ForEach-Object {  
+
+		if ($_ -match '[a-zA-Z0-9]') {
+			$tmpEntryItm = $_ -Split("\s{1}\:\s{1}")   
+			$tmpItmLeft  = $tmpEntryItm[0] -Replace("\s","")
+			$tmpItmRight = $tmpEntryItm[1] -Replace("\s","")
+			if ($tmpItmRight -match '\s{1,}' -or $tmpItmRight -eq '') {
+				$tmpItmRight = '.'
+			}
+			Add-Member -InputObject $tmpObj -MemberType NoteProperty -Name $tmpItmLeft -Value $tmpItmRight        
+		}  
+		
+	} #end $tmpEntry | ForEach-Object {}
+
+	$allElements.Add($tmpObj)
+
+} #end $elementList | ForEach-Object {}
+
+if ($FilterForXMLNode -ne '') {
+	if ($FilterForXMLNode -match '(?i)[a-zA-Z$_\.''" -]{1,}\s{1,}-(ieq|ine|eq|ne|gt|ge|lt|le|or|and|like|notlike|match|notmatch)\s{1,}[a-zA-Z$_\.''" -]{1,}')  {
+		$FilterForXML = $ExecutionContext.InvokeCommand.NewScriptBlock($FilterForXMLNode)				
+		$allElements = $allElements | Where-Object -FilterScript $FilterForXML
+		$api.LogScriptEvent('Get-RemoteSOAPServiceInfo.ps1',603,2,"regex passed for $FilterForXMLNode")
+
+	} else {
+		$api.LogScriptEvent('Get-RemoteSOAPServiceInfo.ps1',603,2,"regex NOT passed for $FilterForXMLNode")
+	}
+}
+
+if ($SortedByXMLNode -match '(?i)\w{1,}') {
+	$allElements = $allElements | Sort-Object -Property $SortedByXMLNode
+}
+
+$addVisualizationFlag = 'True'
+
+if ($addVisualizationFlag -ieq 'True') {	
+
+	$allElementsVis = New-Object -TypeName 'System.Collections.Generic.List[psobject]'
+	
+	for ($i=0; $i -lt $allElements.Count; $i++) {
+
+		if ($i % 2 -eq 0) {
+			$itmElementFlagHash = @{'Counter' = "## $($i)"}           
+			$tmpObject = $allElements[$i] 
+			$objMembers = $tmpObject.psobject.Members | Where-Object {$_.MemberType -eq 'NoteProperty'}
+			for ($j = 0; $j -lt $objMembers.Count; $j++) {
+				$itmElementFlagHash.Add($($objMembers[$j].Name), "## $($objMembers[$j].Value)")
+			}            
+		} else {
+			$itmElementFlagHash = @{'Counter' = "$($i)"}      
+			$tmpObject = $allElements[$i] 
+			$objMembers = $tmpObject.psobject.Members | Where-Object {$_.MemberType -eq 'NoteProperty'}
+			for ($j = 0; $j -lt $objMembers.Count; $j++) {
+				$itmElementFlagHash.Add($($objMembers[$j].Name), "$($objMembers[$j].Value)")
+			}
+		}
+		
+		$itmElementFlagObj = New-Object -TypeName PSObject -Property $itmElementFlagHash
+		$allElementsVis.Add($itmElementFlagObj)
+
+	} #end for ($i=0; $i -lt $allElements.Count; $i++) {}
+
+	$allElements = $null
+	$allElements = $allElementsVis
+
+} #end if ($addVisualizationFlag -ieq 'True')
+
+
+if ($Format -eq 'text') {
+    $allElements | Format-Table -AutoSize | Out-String -Width 4096 | Write-Host
+} elseif ($Format -eq 'json') {
+    $allElements | ConvertTo-Json | Out-String -Width 4096 | Write-Host
+} elseif ($format -eq 'list') {
+    $allElements | Format-List | Out-String -Width 4096 | Write-Host
+}
+
+# Done. (do not remove blank line following this comment as it can cause problems when script is sent to SCOM agent!)
+]]></ScriptBody>
+                <Parameters>
+                  <Parameter>
+                    <Name>Format</Name>
+                    <Value>$Config/Format$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>WebServiceUrl</Name>
+                    <Value>$Config/WebServiceUrl$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>ContentType</Name>
+                    <Value>$Config/ContentType$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>Headers</Name>
+                    <Value>$Config/Headers$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>XMLNodeName</Name>
+                    <Value>$Config/XMLNodeName$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>UserName</Name>
+                    <Value>$Config/UserName$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>PassWord</Name>
+                    <Value>$Config/PassWord$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>SortedByXMLNode</Name>
+                    <Value>$Config/SortedByXMLNode$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>FilterForXMLNode</Name>
+                    <Value>$Config/FilterForXMLNode$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>AddVisualizationFlag</Name>
+                    <Value>$Config/AddVisualizationFlag$</Value>
+                  </Parameter>
+                </Parameters>
+                <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
+              </WriteAction>
+            </MemberModules>
+            <Composition>
+              <Node ID="PowerShellWriteAction" />
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>System!System.BaseData</OutputType>
+        <InputType>System!System.BaseData</InputType>
+      </WriteActionModuleType>
+      <WriteActionModuleType ID="Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.WriteAction" Accessibility="Public" Batching="false">
+        <Configuration>
+          <xsd:element name="Format" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="TimeoutSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="HideDisabled" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="HideChannelInfo" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="AddVisualizationFlag" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="SortedByColumn" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+        </Configuration>
+        <OverrideableParameters>
+          <OverrideableParameter ID="Format" Selector="$Config/Format$" ParameterType="string" />
+          <OverrideableParameter ID="TimeoutSeconds" Selector="$Config/TimeoutSeconds$" ParameterType="int" />
+          <OverrideableParameter ID="HideDisabled" Selector="$Config/HideDisabled$" ParameterType="string" />
+          <OverrideableParameter ID="HideChannelInfo" Selector="$Config/HideChannelInfo$" ParameterType="string" />
+          <OverrideableParameter ID="AddVisualizationFlag" Selector="$Config/AddVisualizationFlag$" ParameterType="string" />
+          <OverrideableParameter ID="SortedByColumn" Selector="$Config/SortedByColumn$" ParameterType="string" />
+        </OverrideableParameters>
+        <ModuleImplementation Isolation="Any">
+          <Composite>
+            <MemberModules>
+              <WriteAction ID="PowerShellWriteAction" TypeID="Windows!Microsoft.Windows.PowerShellWriteAction">
+                <ScriptName>Get-SCOMNotificationConfig.ps1</ScriptName>
+                <ScriptBody><![CDATA[<#
+.SYNOPSIS
+    Get-SCOMNotificationConfig
+.DESCRIPTION
+    This script exports SCOM's notification configuration.
+.Notes
+	AUTHOR: Ruben Zimmermann @ruben8z
+	LASTEDIT: 2020-01-13
+	REQUIRES: PowerShell Version 4, Windows Management Foundation 4, At least Windows 7 or Windows Server 2008 R2.	
+REMARK:
+This PS script comes with ABSOLUTELY NO WARRANTY; for details see gnu-gpl. This is free software, and you are welcome to redistribute it under certain conditions; see gnu-gpl for details.
+    
+#>
+Param(
+    [ValidateSet("text","csv","json", "list")] 
+    [string] $Format = "json",
+	[string] $hideDisabled = 'true',
+	[string] $hideChannelInfo = 'true',
+	[string] $addVisualizationFlag = 'true',
+	[string] $sortedByColumn = 'DisplayName'
+)
+
+
+$ErrorActionPreference = "stop"
+
+Import-Module OperationsManager
+
+
+$subScriptionList = New-Object -TypeName 'System.Collections.Generic.List[psobject]'
+
+$subScriptions    = Get-SCOMNotificationSubscription
+
+foreach ($subScript in $subScriptions) {
+
+    $monitor = $null
+    $rule = $null
+    $Instance = $null
+    $Desc = $null
+    $monClassIDs  = $null
+    $monGroupIDs  = $null
+    $tmpClassName = $null
+    $tmpGroupName = $null
+
+
+    $subScriptHash = @{'Enabled' = $($subScript.Enabled)}
+    $subScriptHash.Add('DisplayName', $($subScript.DisplayName))
+    $subScriptHash.Add('Description', $($subScript.Description))
+        
+    $subSriptCriteria = New-Object -TypeName 'System.Collections.Generic.List[string]'
+    $subSriptCriteriaDetailed = New-Object -TypeName 'System.Collections.Generic.List[string]' 
+    
+    $criteriaVals  = Select-Xml -Content $subScript.Configuration.Criteria -XPath '//Value' `
+                         | foreach {$_.node.InnerXML}        
+
+    $criteriaProps = Select-Xml -Content $subScript.Configuration.Criteria -XPath '//Property' `
+                         | foreach {$_.node.InnerXML}        
+
+     for ($i=0; $i -lt $criteriaProps.Length; $i++) {
+
+        if ($criteriaProps[$i] -eq 'ProblemId') {
+            $monitorTmp     = (Get-SCOMMonitor -Id $criteriaVals[$i]) | Select-Object -Property DisplayName, Name
+            $monitorDisplay = $monitorTmp.DisplayName
+            $monitorName    = $monitorTmp.Name
+            $subSriptCriteria.Add("$monitorDisplay; ")
+            $subSriptCriteriaDetailed.Add("$monitorDisplay - $monitorName; ")
+        }
+
+        if ($criteriaProps[$i] -eq 'RuleId') {
+            $ruleTmp       = (Get-SCOMRule -Id $criteriaVals[$i]) | Select-Object -Property DisplayName, Name
+            $ruleDisplay = $ruleTmp.DisplayName
+            $ruleName    = $ruleTmp.Name
+            $subSriptCriteria.Add("$ruleDisplay; ")            
+            $subSriptCriteriaDetailed.Add("$ruleDisplay - $ruleName; ")
+        }
+
+        if ($criteriaProps[$i] -eq 'BaseManagedEntityId') {
+            $Instance = (Get-SCOMClassInstance -Id $criteriaVals[$i]).DisplayName
+            $subSriptCriteria.Add("$Instance;" )
+            $subSriptCriteriaDetailed.Add("$Instance;" )                        
+        }
+
+        if ($criteriaProps[$i] -eq 'Severity') {            
+            $subSriptCriteriaDetailed.Add("Severity: $($criteriaVals[$i]); ")                 
+        }
+
+        if ($criteriaProps[$i] -eq 'Priority') {
+            $subSriptCriteriaDetailed.Add("Priority: $($criteriaVals[$i]); ")                           
+        }
+
+	    if ($criteriaProps[$i] -eq 'ResolutionState') {
+            $subSriptCriteriaDetailed.Add("ResolutionState: $($criteriaVals[$i]); ")               
+        }
+
+        if($criteriaProps[$i] -eq "AlertDescription") {
+            $Desc = " $($criteriaProps[$i]) : $($criteriaVals[$i])"
+            $subSriptCriteria.Add($Desc)
+            $subSriptCriteriaDetailed.Add($Desc)               
+        }
+
+    } #end for($i=0; $i -lt $criteriaProps.Length; $i++){}
+
+
+    $subScriptHash.Add('Criteria', $($subSriptCriteria))
+    $subScriptHash.Add('CriteriaDetailed', $($subSriptCriteriaDetailed))
+
+    $monClassIDs = $subScript.Configuration.MonitoringClassIds
+    $monGroupIDs = $subScript.Configuration.MonitoringObjectGroupIds
+
+    $subSriptMonInfo = New-Object -TypeName 'System.Collections.Generic.List[string]'
+      
+    if ($monClassIDs) { 
+        if ($monClassIDs.count -gt 1) {
+            foreach ($monID in $monClassIDs) {
+                $tmpClassName = Get-SCOMClass -Id $monID | Select-Object -ExpandProperty DisplayName
+                $subSriptMonInfo.Add($tmpClassName)
+            }
+        } else {
+            $tmpClassName = Get-SCOMClass -Id $monClassIDs | Select-Object -ExpandProperty DisplayName
+            $subSriptMonInfo.Add($tmpClassName)
+        }        
+    }
+    
+    if ($monGroupIDs) {
+        if ($monClassIDs.count -gt 1) {
+            foreach ($groupId in $monGroupIDs) {
+                $tmpGroupName = Get-SCOMGroup -Id $groupId | Select-Object -ExpandProperty DisplayName
+                $subSriptMonInfo.Add($tmpGroupName)
+            }
+        } else {
+            $tmpGroupName = Get-SCOMGroup -Id $monGroupIDs | Select-Object -ExpandProperty DisplayName
+            $subSriptMonInfo.Add($tmpGroupName)
+        }                        
+    }
+
+    $subScriptHash.Add('MonitoringInfo', $($subSriptMonInfo))
+
+    $subSriptChannelInfo = New-Object -TypeName 'System.Collections.Generic.List[string]'
+
+    foreach ($subAction in $subScript.Actions) {        
+        $subSriptChannelInfo.Add("From: $($subAction.From)")
+        $subSriptChannelInfo.Add("Subject: $($subAction.Subject)")
+        $subSriptChannelInfo.Add("Body: $($subAction.Body)")
+        $subSriptChannelInfo.Add("EndPoint: $($subAction.EndPoint.Name)")
+        $subSriptChannelInfo.Add("DisplayName: $($subAction.DisplayName)")
+        $subSriptChannelInfo.Add("Description: $($subAction.Description)")
+    }
+
+    $subScriptHash.Add('ChannelInfo', $($subSriptChannelInfo))
+    
+    $subScriptRecptInfo = New-Object -TypeName 'System.Collections.Generic.List[string]'
+      
+    $subScriptRecptInfo.Add($($subScript.ToRecipients.Name))
+    $subScriptRecptInfo.Add($($subScript.ToRecipients.Devices.Name))
+    
+    $noOfScheduleEntries = ($subScript.ToRecipients.ScheduleEntries).Count
+    $scheduleDays = ''    
+    $schedDetails = ''
+
+    for ($j=0; $j -lt $noOfScheduleEntries; $j++) {
+        $schedDetails = ''
+        $scheduleDays = ($subScript.ToRecipients.ScheduleEntries)[$j].ScheduledDays.ToString()
+        [string]$dailyStart = ($subScript.ToRecipients.ScheduleEntries)[$j].DailyStartTime.Hour
+        $dailyStart += ':' 
+        $dailyStart += ($subScript.ToRecipients.ScheduleEntries)[$j].DailyStartTime.Minute
+        [string]$dailyEnd = ($subScript.ToRecipients.ScheduleEntries)[$j].DailyEndTime.Hour
+        $dailyEnd += ':' 
+        $dailyEnd += ($subScript.ToRecipients.ScheduleEntries)[$j].DailyEndTime.Minute
+        $startEnd = $dailyStart + ' - ' + $dailyEnd
+        $entryType = ($subScript.ToRecipients.ScheduleEntries)[$j].ScheduleEntryType
+        $timeZnTmp  = (($subScript.ToRecipients.ScheduleEntries)[$j].TimeZone).split('|')
+        $timeZone = $timeZnTmp[1]
+        $schedDetails = $scheduleDays + '; ' + $startEnd + '; ' + $timeZone + '; ' + $entryType
+        $subScriptRecptInfo.Add("Details: $($schedDetails)")     
+    }
+
+    $subScriptHash.Add('RecptInfo', $($subScriptRecptInfo))
+    $subScriptObj = New-Object -TypeName PSObject -Property $subScriptHash
+    $subScriptionList.Add($subScriptObj)
+
+}
+
+$rtnList = $null
+
+if ($hideDisabled -ieq 'True') {
+    $rtnList = $subScriptionList | Where-Object {$_.Enabled -eq $true} | Sort-Object -Property DisplayName
+}
+
+if ($hideChannelInfo -ieq 'True') {
+    if ($rtnList) {
+		$rtnList = $rtnList | Select-Object -Property DisplayName, Description, Criteria, CriteriaDetailed, RecptInfo, Enabled, MonitoringInfo | Sort-Object -Property DisplayName
+	} else {
+		$rtnList = $subScriptionList | Select-Object -Property DisplayName, Description, Criteria, CriteriaDetailed, RecptInfo, Enabled, MonitoringInfo | Sort-Object -Property DisplayName
+	}
+}
+
+if ($sortedByColumn -match '(?i)(Enabled|DisplayName|Description|Criteria|CriteriaDetailed|MonitoringInfo|ChannelInfo|RecptInfo)') {
+	$rtnList = $rtnList | Sort-Object -Property $sortedByColumn
+}
+
+
+if ($addVisualizationFlag -ieq 'True') {	
+
+	$subScriptionListFlagged = New-Object -TypeName 'System.Collections.Generic.List[psobject]'
+	
+	for ($k=0; $k -lt $rtnList.Count; $k++) {
+
+		if ($k % 2 -eq 0) {
+			$subScriptFlagHash = @{'Enabled' = "## $($rtnList[$k].Enabled)"}
+			$subScriptFlagHash.Add('DisplayName', "## $($rtnList[$k].DisplayName)")
+			$subScriptFlagHash.Add('Description', "## $($rtnList[$k].Description)")
+			$subScriptFlagHash.Add('Criteria', "## $($rtnList[$k].Criteria)")
+            $subScriptFlagHash.Add('CriteriaDetailed', "## $($rtnList[$k].CriteriaDetailed)")
+			$subScriptFlagHash.Add('MonitoringInfo', "## $($rtnList[$k].MonitoringInfo)")
+			$subScriptFlagHash.Add('ChannelInfo', "## $($rtnList[$k].ChannelInfo)")
+			$subScriptFlagHash.Add('RecptInfo', "## $($rtnList[$k].RecptInfo)")
+		} else {
+			$subScriptFlagHash = @{'Enabled' = "$($rtnList[$k].Enabled)"}
+			$subScriptFlagHash.Add('DisplayName', "$($rtnList[$k].DisplayName)")
+			$subScriptFlagHash.Add('Description', "$($rtnList[$k].Description)")
+			$subScriptFlagHash.Add('Criteria', "$($rtnList[$k].Criteria)")
+            $subScriptFlagHash.Add('CriteriaDetailed', "$($rtnList[$k].CriteriaDetailed)")
+			$subScriptFlagHash.Add('MonitoringInfo', "$($rtnList[$k].MonitoringInfo)")
+			$subScriptFlagHash.Add('ChannelInfo', "$($rtnList[$k].ChannelInfo)")
+			$subScriptFlagHash.Add('RecptInfo', "$($rtnList[$k].RecptInfo)")
+		}
+		
+		$subScriptFlagObj = New-Object -TypeName PSObject -Property $subScriptFlagHash
+		$subScriptionListFlagged.Add($subScriptFlagObj)
+
+	} # end for ($k=0; $k -lt $subScriptionList.Count; $k++) {}
+	
+	$rtnList = $subScriptionListFlagged
+
+} # end if ($addVisualizationFlag -ieq 'True')
+
+
+
+if ($Format -eq 'text') {
+    $rtnList | Format-Table -AutoSize | Out-String -Width 4096 | Write-Host
+} elseif ($Format -eq 'csv') {
+    $rtnList | ConvertTo-Csv -NoTypeInformation | Out-String -Width 4096 | Write-Host
+} elseif ($Format -eq 'json') {
+    $rtnList | ConvertTo-Json | Out-String -Width 4096 | Write-Host
+} elseif ($format -eq 'list') {
+    $rtnList | Format-List | Out-String -Width 4096 | Write-Host
+}
+
+# Done. (do not remove blank line following this comment as it can cause problems when script is sent to SCOM agent!)
+]]></ScriptBody>
+                <Parameters>
+                  <Parameter>
+                    <Name>Format</Name>
+                    <Value>$Config/Format$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>HideDisabled</Name>
+                    <Value>$Config/HideDisabled$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>HideChannelInfo</Name>
+                    <Value>$Config/HideChannelInfo$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>AddVisualizationFlag</Name>
+                    <Value>$Config/AddVisualizationFlag$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>SortedByColumn</Name>
+                    <Value>$Config/SortedByColumn$</Value>
+                  </Parameter>
+                </Parameters>
+                <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
+              </WriteAction>
+            </MemberModules>
+            <Composition>
+              <Node ID="PowerShellWriteAction" />
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>System!System.BaseData</OutputType>
+        <InputType>System!System.BaseData</InputType>
+      </WriteActionModuleType>
+    </ModuleTypes>
+  </TypeDefinitions>
+  <Monitoring>
+    <Tasks>
+      <Task ID="Windows.Computer.DataOnDemand.Addendum.GetComputerLastChanges.Task" Accessibility="Public" Enabled="true" Target="Windows!Microsoft.Windows.Computer" Timeout="240" Remotable="true">
+        <Category>Operations</Category>
+        <WriteAction ID="Windows.Computer.DataOnDemand.Addendum.GetComputerLastChanges.PowerShellWriteAction" TypeID="Windows.Computer.DataOnDemand.Addendum.GetComputerLastChanges.WriteAction">
+          <Format>CSV</Format>
+          <TimeoutSeconds>180</TimeoutSeconds>
+        </WriteAction>
+      </Task>
+      <Task ID="Windows.Computer.DataOnDemand.Addendum.GetComputerDescription.Task" Accessibility="Public" Enabled="true" Target="Windows!Microsoft.Windows.Computer" Timeout="240" Remotable="true">
+        <Category>Operations</Category>
+        <WriteAction ID="Windows.Computer.DataOnDemand.Addendum.GetComputerDescription.PowerShellWriteAction" TypeID="Windows.Computer.DataOnDemand.Addendum.GetComputerDescription.WriteAction">
+          <Format>CSV</Format>
+          <TimeoutSeconds>180</TimeoutSeconds>
+        </WriteAction>
+      </Task>
+      <Task ID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.Task" Accessibility="Public" Enabled="true" Target="Windows!Microsoft.Windows.Computer" Timeout="240" Remotable="true">
+        <Category>Operations</Category>
+        <WriteAction ID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.PowerShellWriteAction" TypeID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction">
+          <Format>JSON</Format>
+          <TimeoutSeconds>180</TimeoutSeconds>
+          <WebServiceUrl></WebServiceUrl>
+          <ContentType>application/soap+xml</ContentType>
+          <Headers></Headers>
+          <XMLNodeName>ElementName</XMLNodeName>
+          <UserName></UserName>
+          <PassWord></PassWord>
+          <SortedByXMLNode></SortedByXMLNode>
+          <FilterForXMLNode></FilterForXMLNode>
+          <AddVisualizationFlag>True</AddVisualizationFlag>
+        </WriteAction>
+      </Task>
+      <Task ID="Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.Task" Accessibility="Public" Enabled="true" Target="Windows!Microsoft.Windows.Server.Computer" Timeout="240" Remotable="true">
+        <Category>Operations</Category>
+        <WriteAction ID="Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.PowerShellWriteAction" TypeID="Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.WriteAction">
+          <Format>JSON</Format>
+          <TimeoutSeconds>180</TimeoutSeconds>
+          <HideDisabled>True</HideDisabled>
+          <HideChannelInfo>True</HideChannelInfo>
+          <AddVisualizationFlag>True</AddVisualizationFlag>
+          <SortedByColumn>DisplayName</SortedByColumn>
+        </WriteAction>
+      </Task>
+    </Tasks>
+  </Monitoring>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetComputerDescription.WriteAction">
+          <Name>
+            Windows.Computer.DataOnDemand.Addendum.GetComputerDescription.WriteAction
+          </Name>
+          <Description>
+            Displays the computers' description locally and from Active Directory
+            Note: JSON format is only supported if PowerShell v3 or later is installed on the target server.
+          </Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetComputerDescription.WriteAction" SubElementID="Format">
+          <Name>Output format</Name>
+          <Description>Allowed values: JSON, Text, List</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetComputerDescription.WriteAction" SubElementID="TimeoutSeconds">
+          <Name>Timeout (Seconds)</Name>
+          <Description>Script timeout in seconds</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetComputerLastChanges.WriteAction">
+          <Name>
+            Windows.Computer.DataOnDemand.Addendum.GetComputerLastChanges.WriteAction
+          </Name>
+          <Description>
+            Displays the computers' last changes; last installed software, logged on user, etc.
+            Note: JSON format is only supported if PowerShell v3 or later is installed on the target server.
+          </Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetComputerLastChanges.WriteAction" SubElementID="Format">
+          <Name>Output format</Name>
+          <Description>Allowed values: JSON, Text, List</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetComputerLastChanges.WriteAction" SubElementID="TimeoutSeconds">
+          <Name>Timeout (Seconds)</Name>
+          <Description>Script timeout in seconds</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction">
+          <Name>
+            Windows.Computer.DataOnDemand.Addendum.GetComputerUptime.WriteAction
+          </Name>
+          <Description>
+            Displays the computers uptime.
+            Note: JSON format is only supported if PowerShell v3 or later is installed on the target server.
+          </Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" SubElementID="Format">
+          <Name>Output format</Name>
+          <Description>Allowed values: JSON, Text, List</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" SubElementID="TimeoutSeconds">
+          <Name>Timeout (Seconds)</Name>
+          <Description>Script timeout in seconds</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" SubElementID="WebServiceUrl">
+          <Name>URL of the WebService</Name>
+          <Description>E.g. https://webserver.domain.com/apipoint </Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" SubElementID="ContentType">
+          <Name>ContentType</Name>
+          <Description>Default: application/soap+xml</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" SubElementID="Headers">
+          <Name>Headers</Name>
+          <Description>Request headers (Key-1=Value-1;Key2=Value2;...)</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" SubElementID="XMLNodeName">
+          <Name>XML NodeName</Name>
+          <Description>Name of the single node (e.g. unit)</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" SubElementID="UserName">
+          <Name>UserName</Name>
+          <Description>UserName for Basic authentication</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" SubElementID="PassWord">
+          <Name>PassWord</Name>
+          <Description>PassWord for Basic authentication</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" SubElementID="SortedByXMLNode">
+          <Name>SortedByXMLNode</Name>
+          <Description>Node that should be used to for sorting</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" SubElementID="FilterForXMLNode">
+          <Name>FilterForXMLNode</Name>
+          <Description>Filter a Node with PowerShell syntax. E.g. Element -like "*off*"</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" SubElementID="AddVisualizationFlag">
+          <Name>AddVisualizationFlag</Name>
+          <Description>Adds a ## (double hashtag) at the beginning of every 2nd entry so that nice formating can be performed</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.WriteAction">
+          <Name>
+            Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.WriteAction
+          </Name>
+          <Description>
+            Displays the SCOM's notification configuration incl. subscription, subscribers, channel, etc.
+            This task works ONLY if targeting SCOM Management Server!
+            
+            Note: JSON format is only supported if PowerShell v3 or later is installed on the target server.
+          </Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.WriteAction" SubElementID="Format">
+          <Name>Output format</Name>
+          <Description>Allowed values: JSON, Text, List</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.WriteAction" SubElementID="TimeoutSeconds">
+          <Name>Timeout (Seconds)</Name>
+          <Description>Script timeout in seconds</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.WriteAction" SubElementID="HideDisabled">
+          <Name>HideDisabled</Name>
+          <Description>Hides disabled subscriptions [true|false] (default = true)</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.WriteAction" SubElementID="HideChannelInfo">
+          <Name>HideChannelInfo</Name>
+          <Description>Hides Channel Information [true|false] (default = true)</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.WriteAction" SubElementID="AddVisualizationFlag">
+          <Name>AddVisualizationFlag</Name>
+          <Description>Adds a ## (double hashtag) at the beginning of every 2nd entry so that nice formating can be performed</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.WriteAction" SubElementID="SortedByColumn">
+          <Name>SortedByColumn</Name>
+          <Description>Sorts according to the field specified. (E.g. Description, DisplayName, RecptInfo, Criteria, Enabled </Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetComputerLastChanges.Task">
+          <Name>Get-ComputerLastChanges ( Windows Computer DataOnDemand Addendum )</Name>
+          <Description>
+            Displays the computers' last changes; last installed software, logged on user, etc.
+            Note: JSON format is only supported if PowerShell v3 or later is installed on the target server.
+
+          </Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetComputerDescription.Task">
+          <Name>Get-ComputerDescription ( Windows Computer DataOnDemand Addendum )</Name>
+          <Description>
+            Displays the Computer's local description and the one from AD.
+            Note: JSON format is only supported if PowerShell v3 or later is installed on the target server.
+
+          </Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.Task">
+          <Name>Get-RemoteSOAPServiceInfo ( Windows Computer DataOnDemand Addendum )</Name>
+          <Description>            
+            Queries a remote SOAP service (XML) displays it's data.
+            Note: JSON format is only supported if PowerShell v3 or later is installed on the target server.
+            
+            Information for Headers are not yet considered. Support will come in a later version.
+          </Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.Task">
+          <Name>Get SCOM Notification Configuration ( Windows Computer DataOnDemand Addendum )</Name>
+          <Description>
+            Displays the SCOM's notification configuration incl. subscription, subscribers, channel, etc.
+            This task works ONLY if targeting SCOM Management Server!
+            
+            Note: JSON format is only supported if PowerShell v3 or later is installed on the target server.
+          </Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum">
+          <Name>Windows.Computer.DataOnDemand.Addendum</Name>
+          <Description>Extends SCOM Agent tasks that to be used in a Dashboards.</Description>
+        </DisplayString>
+      </DisplayStrings>
+      <KnowledgeArticles></KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPack>

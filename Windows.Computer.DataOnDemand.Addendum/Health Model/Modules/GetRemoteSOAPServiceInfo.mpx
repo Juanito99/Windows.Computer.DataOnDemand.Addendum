@@ -1,0 +1,177 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <TypeDefinitions>
+    <ModuleTypes>
+
+      <WriteActionModuleType ID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" Accessibility="Public" Batching="false">
+        <Configuration>
+          <xsd:element name="Format" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="TimeoutSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="WebServiceUrl" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="ContentType" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />          
+          <xsd:element name="Headers" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="XMLNodeName" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="UserName" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="PassWord" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="SortedByXMLNode" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="FilterForXMLNode" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="AddVisualizationFlag" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+        </Configuration>
+        <OverrideableParameters>
+          <OverrideableParameter ID="Format" Selector="$Config/Format$" ParameterType="string" />
+          <OverrideableParameter ID="TimeoutSeconds" Selector="$Config/TimeoutSeconds$" ParameterType="int" />
+          <OverrideableParameter ID="WebServiceUrl" Selector="$Config/WebServiceUrl$" ParameterType="string" />
+          <OverrideableParameter ID="ContentType" Selector="$Config/ContentType$" ParameterType="string" />          
+          <OverrideableParameter ID="Headers" Selector="$Config/Headers$" ParameterType="string" />
+          <OverrideableParameter ID="XMLNodeName" Selector="$Config/XMLNodeName$" ParameterType="string" />
+          <OverrideableParameter ID="UserName" Selector="$Config/UserName$" ParameterType="string" />
+          <OverrideableParameter ID="PassWord" Selector="$Config/PassWord$" ParameterType="string" />
+          <OverrideableParameter ID="SortedByXMLNode" Selector="$Config/SortedByXMLNode$" ParameterType="string" />
+          <OverrideableParameter ID="FilterForXMLNode" Selector="$Config/FilterForXMLNode$" ParameterType="string" />
+          <OverrideableParameter ID="AddVisualizationFlag" Selector="$Config/AddVisualizationFlag$" ParameterType="string" />
+        </OverrideableParameters>
+        <ModuleImplementation Isolation="Any">
+          <Composite>
+            <MemberModules>
+              <WriteAction ID="PowerShellWriteAction" TypeID="Windows!Microsoft.Windows.PowerShellWriteAction">
+                <ScriptName>Get-RemoteSOAPServiceInfo</ScriptName>
+                <ScriptBody>$IncludeFileContent/Health Model/Scripts/Get-RemoteSOAPServiceInfo.ps1$</ScriptBody>
+                <Parameters>
+                  <Parameter>
+                    <Name>Format</Name>
+                    <Value>$Config/Format$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>WebServiceUrl</Name>
+                    <Value>$Config/WebServiceUrl$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>ContentType</Name>
+                    <Value>$Config/ContentType$</Value>
+                  </Parameter>                  
+                  <Parameter>
+                    <Name>Headers</Name>
+                    <Value>$Config/Headers$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>XMLNodeName</Name>
+                    <Value>$Config/XMLNodeName$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>UserName</Name>
+                    <Value>$Config/UserName$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>PassWord</Name>
+                    <Value>$Config/PassWord$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>SortedByXMLNode</Name>
+                    <Value>$Config/SortedByXMLNode$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>FilterForXMLNode</Name>
+                    <Value>$Config/FilterForXMLNode$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>AddVisualizationFlag</Name>
+                    <Value>$Config/AddVisualizationFlag$</Value>
+                  </Parameter>
+                </Parameters>
+                <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
+              </WriteAction>
+            </MemberModules>
+            <Composition>
+              <Node ID="PowerShellWriteAction" />
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>System!System.BaseData</OutputType>
+        <InputType>System!System.BaseData</InputType>
+      </WriteActionModuleType>
+
+
+
+    </ModuleTypes>
+  </TypeDefinitions>
+
+
+
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" >
+          <Name>
+            Windows.Computer.DataOnDemand.Addendum.GetComputerUptime.WriteAction
+          </Name>
+          <Description>
+            Displays the computers uptime.
+            Note: JSON format is only supported if PowerShell v3 or later is installed on the target server.
+          </Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" SubElementID="Format">
+          <Name>Output format</Name>
+          <Description>Allowed values: JSON, Text, List</Description>
+        </DisplayString>
+        
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" SubElementID="TimeoutSeconds">
+          <Name>Timeout (Seconds)</Name>
+          <Description>Script timeout in seconds</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" SubElementID="WebServiceUrl">
+          <Name>URL of the WebService</Name>
+          <Description>E.g. https://webserver.domain.com/apipoint </Description>
+        </DisplayString>
+        
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" SubElementID="ContentType">
+          <Name>ContentType</Name>
+          <Description>Default: application/soap+xml</Description>
+        </DisplayString>                
+        
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" SubElementID="Headers">
+          <Name>Headers</Name>
+          <Description>Request headers (Key-1=Value-1;Key2=Value2;...)</Description>
+        </DisplayString>
+        
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" SubElementID="XMLNodeName">
+          <Name>XML NodeName</Name>
+          <Description>Name of the single node (e.g. unit)</Description>
+        </DisplayString>
+        
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" SubElementID="UserName">
+          <Name>UserName</Name>
+          <Description>UserName for Basic authentication</Description>
+        </DisplayString>
+        
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" SubElementID="PassWord">
+          <Name>PassWord</Name>
+          <Description>PassWord for Basic authentication</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" SubElementID="SortedByXMLNode">
+          <Name>SortedByXMLNode</Name>
+          <Description>Node that should be used to for sorting</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" SubElementID="FilterForXMLNode">
+          <Name>FilterForXMLNode</Name>
+          <Description>Filter a Node with PowerShell syntax. E.g. Element -like "*off*"</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" SubElementID="AddVisualizationFlag">
+          <Name>AddVisualizationFlag</Name>
+          <Description>Adds a ## (double hashtag) at the beginning of every 2nd entry so that nice formatting can be performed</Description>
+        </DisplayString>
+
+
+      </DisplayStrings>
+
+
+      <KnowledgeArticles></KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+
+</ManagementPackFragment>

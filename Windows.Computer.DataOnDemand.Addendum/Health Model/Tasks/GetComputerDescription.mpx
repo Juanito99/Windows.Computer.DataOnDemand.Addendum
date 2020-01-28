@@ -1,0 +1,36 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <Monitoring>
+    <Tasks>
+
+      <Task ID="Windows.Computer.DataOnDemand.Addendum.GetComputerDescription.Task" Accessibility="Public" Enabled="true" Target="Windows!Microsoft.Windows.Computer" Timeout="240" Remotable="true">
+        <Category>Operations</Category>
+        <WriteAction ID="Windows.Computer.DataOnDemand.Addendum.GetComputerDescription.PowerShellWriteAction" TypeID="Windows.Computer.DataOnDemand.Addendum.GetComputerDescription.WriteAction">
+          <Format>CSV</Format>
+          <TimeoutSeconds>180</TimeoutSeconds>
+        </WriteAction>
+      </Task>
+
+    </Tasks>
+  </Monitoring>
+
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetComputerDescription.Task">
+          <Name>Get-ComputerDescription ( Windows Computer DataOnDemand Addendum )</Name>
+          <Description>
+            Displays the Computer's local description and the one from AD.
+            Note: JSON format is only supported if PowerShell v3 or later is installed on the target server.
+
+          </Description>
+        </DisplayString>
+
+      </DisplayStrings>
+
+      <KnowledgeArticles></KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+
+</ManagementPackFragment>
