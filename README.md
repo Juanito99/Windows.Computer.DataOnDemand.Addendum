@@ -5,23 +5,28 @@ The MP named Windows.Computer.DataOnDemand.Addendum provides different kinds of 
 
 ### Get-ComputerDescription:
 Retrieves the computer's local description and the one from the Active Directory computer object. 
+
 ![Get-ComputerDescription](https://raw.githubusercontent.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/master/PicturesForGitWebSite/Get-ComputerDescription.png)
 
 
 ### Get-ComputerLastChanges:
 Retrieves the computer's local description and the one from the Active Directory computer object. 
+
 ![Get-ComputerLastChanges](https://raw.githubusercontent.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/master/PicturesForGitWebSite/Get-ComputerLastChanges.png)
 
 
 ### Get-SCOMNotificaitonConfiguration:
 Displays the SCOM's notification configuration incl. subscription, subscribers, channel, etc. 
 Task works only if selecting a Management Server!
+
 ![Get-SCOMNotificaitonConfiguration](https://raw.githubusercontent.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/master/PicturesForGitWebSite/Get-SCOMNotificaitonConfiguration.png)
 
 
 ### Get-RemoteSOAPServiceInfo:
 Queries a remote web service via SOAP / XML displays its data; before RESTful became standard, web services could be consumed via SOAP.
+
 ![Get-RemoteSOAPServiceInfo](https://raw.githubusercontent.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/master/PicturesForGitWebSite/Get-RemoteSOAPServiceInfo.png)
+
 
 
 ### More information on:
@@ -31,11 +36,12 @@ Queries a remote web service via SOAP / XML displays its data; before RESTful be
 
 ### Downloads:
 
-[ManagementPack-Sealed](https://github.com/Juanito99/SolarWinds_NPM_OpsMgr/blob/master/ABC.Network.SolarWinds.NPM/ABC.Network.SolarWinds.NPM/bin/Debug/ABC.Network.SolarWinds.NPM.mpb) 
+[ManagementPack-Sealed](
+https://github.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/blob/master/Windows.Computer.DataOnDemand.Addendum/bin/Debug/Windows.Computer.DataOnDemand.Addendum.mbp)
 
-[ManagementPack-UnSealed](https://github.com/Juanito99/SolarWinds_NPM_OpsMgr/blob/master/ABC.Network.SolarWinds.NPM/ABC.Network.SolarWinds.NPM/bin/Release/ABC.Network.SolarWinds.NPM.mpb) 
+[ManagementPack-UnSealed](https://github.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/blob/master/Windows.Computer.DataOnDemand.Addendum/bin/Debug/Windows.Computer.DataOnDemand.Addendum.xml)
 
-[Source for VSAE 2015](https://github.com/Juanito99/SolarWinds_NPM_OpsMgr/tree/master/ABC.Network.SolarWinds.NPM)
+[Source for VSAE 2017](https://github.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/blob/master/Windows.Computer.DataOnDemand.Addendum/)
 
 
 
