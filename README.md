@@ -30,7 +30,8 @@ Queries a remote web service via SOAP / XML displays its data; before RESTful be
 
 
 ### More information on:
-[Documentation](https://raw.githubusercontent.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/master/Documentation/DataOnDemandAddendum_ManagementPack_for_WindowsComputers.pdf))
+[Documentation](https://raw.githubusercontent.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/master/Documentation/DataOnDemandAddendum_ManagementPack_for_WindowsComputers.pdf)
+
 
 
 
@@ -42,6 +43,7 @@ https://github.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/blob/master/
 [ManagementPack-UnSealed](https://github.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/blob/master/Windows.Computer.DataOnDemand.Addendum/bin/Debug/Windows.Computer.DataOnDemand.Addendum.xml)
 
 [Source for VSAE 2017](https://github.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/blob/master/Windows.Computer.DataOnDemand.Addendum/)
+
 
 
 
