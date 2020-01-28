@@ -1,8 +1,10 @@
-## Integrate SolarWinds NPM into OpsMgr
-Integrate your Network health state into SCOM relying on SolarWinds Network Monitoring solution.
+## Data on Demand Addendum Management Pack for Windows Computers
+The MP named Windows.Computer.DataOnDemand.Addendum provides different kinds of Agent Tasks for direct use in the SCOM console or in a Dashboard Tool.
 
-### SolarWinds NPM:
-![Solar_NPM](https://raw.githubusercontent.com/Juanito99/SolarWinds_NPM_OpsMgr/master/PicturesForGitWebSite/SolarWinds-NPM.png)
+
+### Get-ComputerDescription:
+Retrieves the computer's local description and the one from the Active Directory computer object. 
+![Get-ComputerDescription](https://raw.githubusercontent.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/master/PicturesForGitWebSite/Get-ComputerDescription.png)
 
 ### Inventory View:
 ![Solar_Inventory](https://raw.githubusercontent.com/Juanito99/SolarWinds_NPM_OpsMgr/master/PicturesForGitWebSite/SolarOpsMgr_InvView.png)
@@ -30,17 +32,10 @@ Integrate your Network health state into SCOM relying on SolarWinds Network Moni
 
 
 
-### Community Management Pack:
-Keep this and many other management packs automatically up to date by installing the [Community Management Pack](https://squaredup.com/landing-pages/the-scom-community-mp-catalog)
-
-
-
-
-
 ### License Terms
 
-Integrate SolarWinds NPM into OpsMgr
-Copyright (C) 2017 Ruben Zimmermann (Juanito99)
+Windows.Computer.DataOnDemand.Addendum
+Copyright (C) 2020 Ruben Zimmermann (Juanito99)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
