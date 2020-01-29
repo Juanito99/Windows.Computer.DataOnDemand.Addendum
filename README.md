@@ -47,6 +47,11 @@ https://github.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/blob/master/
 
 
 
+### Community Management Pack:
+Keep this and many other management packs automatically up to date by installing the [Community Management Pack](http://cookdown.com/scom-essentials/community-catalog/)
+
+
+
 ### License Terms
 
 Windows.Computer.DataOnDemand.Addendum
