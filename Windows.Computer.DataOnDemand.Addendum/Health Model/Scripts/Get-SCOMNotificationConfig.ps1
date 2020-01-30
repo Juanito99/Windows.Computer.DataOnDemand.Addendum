@@ -4,7 +4,8 @@
 .DESCRIPTION
     This script exports SCOM's notification configuration.
 .Notes
-	AUTHOR: Ruben Zimmermann @ruben8z
+	AUTHOR: Sameer Mhaisekar; mhaisekar.sameer15@gmail.com
+	AUTHOR: Ruben Zimmermann; @ruben8z ( minor modifications for filtering and output options )
 	LASTEDIT: 2020-01-13
 	REQUIRES: PowerShell Version 4, Windows Management Foundation 4, At least Windows 7 or Windows Server 2008 R2.	
 REMARK:
@@ -112,11 +113,11 @@ foreach ($subScript in $subScriptions) {
         if ($monClassIDs.count -gt 1) {
             foreach ($monID in $monClassIDs) {
                 $tmpClassName = Get-SCOMClass -Id $monID | Select-Object -ExpandProperty DisplayName
-                $subSriptMonInfo.Add($tmpClassName)
+                $subSriptMonInfo.Add("Class: $($tmpClassName)")
             }
         } else {
             $tmpClassName = Get-SCOMClass -Id $monClassIDs | Select-Object -ExpandProperty DisplayName
-            $subSriptMonInfo.Add($tmpClassName)
+            $subSriptMonInfo.Add("Class: $($tmpClassName)")
         }        
     }
     
@@ -124,11 +125,11 @@ foreach ($subScript in $subScriptions) {
         if ($monClassIDs.count -gt 1) {
             foreach ($groupId in $monGroupIDs) {
                 $tmpGroupName = Get-SCOMGroup -Id $groupId | Select-Object -ExpandProperty DisplayName
-                $subSriptMonInfo.Add($tmpGroupName)
+                $subSriptMonInfo.Add("Group: $($tmpGroupName)")
             }
         } else {
             $tmpGroupName = Get-SCOMGroup -Id $monGroupIDs | Select-Object -ExpandProperty DisplayName
-            $subSriptMonInfo.Add($tmpGroupName)
+            $subSriptMonInfo.Add("Group: $($tmpGroupName)")
         }                        
     }
 
