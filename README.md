@@ -10,7 +10,7 @@ Retrieves the computer's local description and the one from the Active Directory
 
 
 ### Get-ComputerLastChanges:
-Retrieves the computer's local description and the one from the Active Directory computer object. 
+o	Displays the computers' last changes; last installed software, interactive logged on user, last boot, etc.
 
 ![Get-ComputerLastChanges](https://raw.githubusercontent.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/master/PicturesForGitWebSite/Get-ComputerLastChanges.png)
 
