@@ -3,7 +3,7 @@
   <Manifest>
     <Identity>
       <ID>Windows.Computer.DataOnDemand.Addendum</ID>
-      <Version>1.0.0.94</Version>
+      <Version>1.0.0.95</Version>
     </Identity>
     <Name>Windows.Computer.DataOnDemand.Addendum</Name>
     <References>
@@ -24,7 +24,7 @@
       <WriteActionModuleType ID="Windows.Computer.DataOnDemand.Addendum.GetComputerDescription.WriteAction" Accessibility="Public" Batching="false">
         <Configuration>
           <xsd:element name="Format" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
-          <xsd:element minOccurs="1" name="TimeoutSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="TimeoutSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
         </Configuration>
         <OverrideableParameters>
           <OverrideableParameter ID="Format" Selector="$Config/Format$" ParameterType="string" />
@@ -135,7 +135,7 @@ if ($Format -eq 'text') {
       <WriteActionModuleType ID="Windows.Computer.DataOnDemand.Addendum.GetComputerLastChanges.WriteAction" Accessibility="Public" Batching="false">
         <Configuration>
           <xsd:element name="Format" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
-          <xsd:element minOccurs="1" name="TimeoutSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="TimeoutSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
         </Configuration>
         <OverrideableParameters>
           <OverrideableParameter ID="Format" Selector="$Config/Format$" ParameterType="string" />
@@ -272,7 +272,7 @@ if ($Format -eq 'text') {
       <WriteActionModuleType ID="Windows.Computer.DataOnDemand.Addendum.GetRemoteSOAPServiceInfo.WriteAction" Accessibility="Public" Batching="false">
         <Configuration>
           <xsd:element name="Format" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
-          <xsd:element minOccurs="1" name="TimeoutSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="TimeoutSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
           <xsd:element name="WebServiceUrl" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
           <xsd:element name="ContentType" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
           <xsd:element name="Headers" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
@@ -549,7 +549,7 @@ if ($Format -eq 'text') {
       <WriteActionModuleType ID="Windows.Computer.DataOnDemand.Addendum.GetSCOMNotificationConfig.WriteAction" Accessibility="Public" Batching="false">
         <Configuration>
           <xsd:element name="Format" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
-          <xsd:element minOccurs="1" name="TimeoutSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="TimeoutSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
           <xsd:element name="HideDisabled" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
           <xsd:element name="HideChannelInfo" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
           <xsd:element name="AddVisualizationFlag" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />

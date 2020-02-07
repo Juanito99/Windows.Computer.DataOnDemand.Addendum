@@ -6,7 +6,7 @@
       <WriteActionModuleType ID="Windows.Computer.DataOnDemand.Addendum.GetComputerDescription.WriteAction" Accessibility="Public" Batching="false">
         <Configuration>
           <xsd:element name="Format" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
-          <xsd:element minOccurs="1" name="TimeoutSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="TimeoutSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
         </Configuration>
         <OverrideableParameters>
           <OverrideableParameter ID="Format" Selector="$Config/Format$" ParameterType="string" />
