@@ -31,7 +31,9 @@ Queries a remote web service via SOAP / XML displays its data; before RESTful be
 ### Get-MSGraphData / Get-MSGraphBetaData
 Queries Microsoft’s Graph API by extending given OData functions
 
-![Get-MSGraphData](https://raw.githubusercontent.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/master/PicturesForGitWebSite/Get-MSGraphBetaDataData.png)
+![Get-MSGraphData](https://raw.githubusercontent.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/master/PicturesForGitWebSite/Get-MSGraphBetaData.png)
+
+
 
 ### More information on:
 [Documentation](https://raw.githubusercontent.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/master/Documentation/DataOnDemandAddendum_ManagementPack_for_WindowsComputers.pdf)
