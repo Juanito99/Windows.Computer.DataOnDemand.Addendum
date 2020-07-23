@@ -1,0 +1,352 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  
+  <TypeDefinitions>
+    <ModuleTypes>
+
+      <WriteActionModuleType ID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphData.WriteAction" Accessibility="Public" Batching="false">
+        <Configuration>
+          <xsd:element name="Format" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="TimeoutSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="WebServiceUrl" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="GraphQry" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="ClientId" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="TenantId" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="ClientSecret" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="SortedBy" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="FilteredBy" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="AddVisualizationFlag" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="SortDescending" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="DisplayItemNumber" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+        </Configuration>
+        <OverrideableParameters>
+          <OverrideableParameter ID="Format" Selector="$Config/Format$" ParameterType="string" />
+          <OverrideableParameter ID="TimeoutSeconds" Selector="$Config/TimeoutSeconds$" ParameterType="int" />
+          <OverrideableParameter ID="WebServiceUrl" Selector="$Config/WebServiceUrl$" ParameterType="string" />
+          <OverrideableParameter ID="GraphQry" Selector="$Config/GraphQry$" ParameterType="string" />
+          <OverrideableParameter ID="ClientId" Selector="$Config/ClientId$" ParameterType="string" />
+          <OverrideableParameter ID="TenantId" Selector="$Config/TenantId$" ParameterType="string" />
+          <OverrideableParameter ID="ClientSecret" Selector="$Config/ClientSecret$" ParameterType="string" />
+          <OverrideableParameter ID="SortedBy" Selector="$Config/SortedBy$" ParameterType="string" />
+          <OverrideableParameter ID="FilteredBy" Selector="$Config/FilteredBy$" ParameterType="string" />
+          <OverrideableParameter ID="AddVisualizationFlag" Selector="$Config/AddVisualizationFlag$" ParameterType="string" />
+          <OverrideableParameter ID="SortDescending" Selector="$Config/SortDescending$" ParameterType="string" />
+          <OverrideableParameter ID="DisplayItemNumber" Selector="$Config/DisplayItemNumber$" ParameterType="string" />          
+        </OverrideableParameters>
+        <ModuleImplementation Isolation="Any">
+          <Composite>
+            <MemberModules>
+              <WriteAction ID="PowerShellWriteAction" TypeID="Windows!Microsoft.Windows.PowerShellWriteAction">
+                <ScriptName>Get-MSGraphData</ScriptName>
+                <ScriptBody>$IncludeFileContent/Health Model/Scripts/Get-MSGraphData.ps1$</ScriptBody>
+                <Parameters>
+                  <Parameter>
+                    <Name>Format</Name>
+                    <Value>$Config/Format$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>WebServiceUrl</Name>
+                    <Value>$Config/WebServiceUrl$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>GraphQry</Name>
+                    <Value>$Config/GraphQry$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>ClientId</Name>
+                    <Value>$Config/ClientId$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>TenantId</Name>
+                    <Value>$Config/TenantId$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>ClientSecret</Name>
+                    <Value>$Config/ClientSecret$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>SortedBy</Name>
+                    <Value>$Config/SortedBy$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>FilteredBy</Name>
+                    <Value>$Config/FilteredBy$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>AddVisualizationFlag</Name>
+                    <Value>$Config/AddVisualizationFlag$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>SortDescending</Name>
+                    <Value>$Config/SortDescending$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>DisplayItemNumber</Name>
+                    <Value>$Config/DisplayItemNumber$</Value>
+                  </Parameter>                  
+                </Parameters>
+                <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
+              </WriteAction>
+            </MemberModules>
+            <Composition>
+              <Node ID="PowerShellWriteAction" />
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>System!System.BaseData</OutputType>
+        <InputType>System!System.BaseData</InputType>
+      </WriteActionModuleType>
+
+      <WriteActionModuleType ID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.WriteAction" Accessibility="Public" Batching="false">
+        <Configuration>
+          <xsd:element name="Format" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="TimeoutSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="WebServiceUrl" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="GraphQry" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="ClientId" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="TenantId" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="ClientSecret" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="SortedBy" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="FilteredBy" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="AddVisualizationFlag" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="SortDescending" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="DisplayItemNumber" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />          
+        </Configuration>
+        <OverrideableParameters>
+          <OverrideableParameter ID="Format" Selector="$Config/Format$" ParameterType="string" />
+          <OverrideableParameter ID="TimeoutSeconds" Selector="$Config/TimeoutSeconds$" ParameterType="int" />
+          <OverrideableParameter ID="WebServiceUrl" Selector="$Config/WebServiceUrl$" ParameterType="string" />
+          <OverrideableParameter ID="GraphQry" Selector="$Config/GraphQry$" ParameterType="string" />
+          <OverrideableParameter ID="ClientId" Selector="$Config/ClientId$" ParameterType="string" />
+          <OverrideableParameter ID="TenantId" Selector="$Config/TenantId$" ParameterType="string" />
+          <OverrideableParameter ID="ClientSecret" Selector="$Config/ClientSecret$" ParameterType="string" />
+          <OverrideableParameter ID="SortedBy" Selector="$Config/SortedBy$" ParameterType="string" />
+          <OverrideableParameter ID="FilteredBy" Selector="$Config/FilteredBy$" ParameterType="string" />
+          <OverrideableParameter ID="AddVisualizationFlag" Selector="$Config/AddVisualizationFlag$" ParameterType="string" />
+          <OverrideableParameter ID="SortDescending" Selector="$Config/SortDescending$" ParameterType="string" />
+          <OverrideableParameter ID="DisplayItemNumber" Selector="$Config/DisplayItemNumber$" ParameterType="string" />          
+        </OverrideableParameters>
+        <ModuleImplementation Isolation="Any">
+          <Composite>
+            <MemberModules>
+              <WriteAction ID="PowerShellWriteAction" TypeID="Windows!Microsoft.Windows.PowerShellWriteAction">
+                <ScriptName>Get-MSGraphData</ScriptName>
+                <ScriptBody>$IncludeFileContent/Health Model/Scripts/Get-MSGraphData.ps1$</ScriptBody>
+                <Parameters>
+                  <Parameter>
+                    <Name>Format</Name>
+                    <Value>$Config/Format$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>WebServiceUrl</Name>
+                    <Value>$Config/WebServiceUrl$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>GraphQry</Name>
+                    <Value>$Config/GraphQry$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>ClientId</Name>
+                    <Value>$Config/ClientId$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>TenantId</Name>
+                    <Value>$Config/TenantId$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>ClientSecret</Name>
+                    <Value>$Config/ClientSecret$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>SortedBy</Name>
+                    <Value>$Config/SortedBy$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>FilteredBy</Name>
+                    <Value>$Config/FilteredBy$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>AddVisualizationFlag</Name>
+                    <Value>$Config/AddVisualizationFlag$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>SortDescending</Name>
+                    <Value>$Config/SortDescending$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>DisplayItemNumber</Name>
+                    <Value>$Config/DisplayItemNumber$</Value>
+                  </Parameter>
+                </Parameters>
+                <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
+              </WriteAction>
+            </MemberModules>
+            <Composition>
+              <Node ID="PowerShellWriteAction" />
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>System!System.BaseData</OutputType>
+        <InputType>System!System.BaseData</InputType>
+      </WriteActionModuleType>
+
+
+    </ModuleTypes>
+  </TypeDefinitions>
+
+
+
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphData.WriteAction" >
+          <Name>
+            Windows.Computer.DataOnDemand.Addendum.GetMSGraphData.WriteAction
+          </Name>
+          <Description>
+            Retrieves information from MS Graph
+            Note: JSON format is only supported if PowerShell v3 or later is installed on the target server.
+          </Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphData.WriteAction" SubElementID="Format">
+          <Name>Output format</Name>
+          <Description>Allowed values: JSON, Text, List</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphData.WriteAction" SubElementID="TimeoutSeconds">
+          <Name>Timeout (Seconds)</Name>
+          <Description>Script timeout in seconds</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphData.WriteAction" SubElementID="WebServiceUrl">
+          <Name>URL of the MS Graph</Name>
+          <Description>E.g. https://graph.microsoft.com </Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphData.WriteAction" SubElementID="GraphQry">
+          <Name>Query to MS Graph</Name>
+          <Description>E.g. reports/getSharePointSiteUsageSiteCounts(period='D30') </Description>
+        </DisplayString>
+
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphData.WriteAction" SubElementID="ClientId">
+          <Name>ClientId</Name>
+          <Description>Application (client) ID, needs to be taken from the AppRegistration site (see help file for more information)</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphData.WriteAction" SubElementID="TenantId">
+          <Name>TenantId</Name>
+          <Description>ID of your Azure Tenant, also visible on the AppRegistration page</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphData.WriteAction" SubElementID="ClientSecret">
+          <Name>Client Secret</Name>
+          <Description>Needs to be generated on the AppRegistration page</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphData.WriteAction" SubElementID="SortedBy">
+          <Name>SortedBy</Name>
+          <Description>Node that should be used to for sorting</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphData.WriteAction" SubElementID="FilteredBy">
+          <Name>FilteredBy</Name>
+          <Description>Filter a Node with PowerShell syntax. E.g. Element -like "*off*"</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphData.WriteAction" SubElementID="AddVisualizationFlag">
+          <Name>AddVisualizationFlag</Name>
+          <Description>Adds a ## (double hashtag) at the beginning of every 2nd entry so that nice formatting can be performed</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphData.WriteAction" SubElementID="SortDescending">
+          <Name>SortDescending</Name>
+          <Description>Default is False, can be set to True </Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphData.WriteAction" SubElementID="DisplayItemNumber">
+          <Name>DisplayItemNumber</Name>
+          <Description>Number of items that will be displayed, default is 10</Description>
+        </DisplayString>
+
+              
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.WriteAction" >
+          <Name>
+            Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.WriteAction
+          </Name>
+          <Description>
+            Retrieves information from MS Graph
+            Note: JSON format is only supported if PowerShell v3 or later is installed on the target server.
+          </Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.WriteAction" SubElementID="Format">
+          <Name>Output format</Name>
+          <Description>Allowed values: JSON, Text, List</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.WriteAction" SubElementID="TimeoutSeconds">
+          <Name>Timeout (Seconds)</Name>
+          <Description>Script timeout in seconds</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.WriteAction" SubElementID="WebServiceUrl">
+          <Name>URL of the MS Graph</Name>
+          <Description>E.g. https://graph.microsoft.com </Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.WriteAction" SubElementID="GraphQry">
+          <Name>Query to MS Graph</Name>
+          <Description>E.g. reports/getSharePointSiteUsageSiteCounts(period='D30') </Description>
+        </DisplayString>
+
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.WriteAction" SubElementID="ClientId">
+          <Name>ClientId</Name>
+          <Description>Application (client) ID, needs to be taken from the AppRegistration site (see help file for more information)</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.WriteAction" SubElementID="TenantId">
+          <Name>TenantId</Name>
+          <Description>ID of your Azure Tenant, also visible on the AppRegistration page</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.WriteAction" SubElementID="ClientSecret">
+          <Name>Client Secret</Name>
+          <Description>Needs to be generated on the AppRegistration page</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.WriteAction" SubElementID="SortedBy">
+          <Name>SortedBy</Name>
+          <Description>Node that should be used to for sorting</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.WriteAction" SubElementID="FilteredBy">
+          <Name>FilteredBy</Name>
+          <Description>Filter a Node with PowerShell syntax. E.g. Element -like "*off*"</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.WriteAction" SubElementID="AddVisualizationFlag">
+          <Name>AddVisualizationFlag</Name>
+          <Description>Adds a ## (double hashtag) at the beginning of every 2nd entry so that nice formatting can be performed</Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.WriteAction" SubElementID="SortDescending">
+          <Name>SortDescending</Name>
+          <Description>Default is False, can be set to True </Description>
+        </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.WriteAction" SubElementID="DisplayItemNumber">
+          <Name>DisplayItemNumber</Name>
+          <Description>Number of items that will be displayed, default is 10</Description>
+        </DisplayString>
+
+      </DisplayStrings>
+
+
+      <KnowledgeArticles></KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+
+</ManagementPackFragment>

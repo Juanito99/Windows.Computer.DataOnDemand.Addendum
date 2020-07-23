@@ -5,7 +5,7 @@
     <RootNamespace>Windows.Computer.DataOnDemand.Addendum</RootNamespace>
     <Name>Windows.Computer.DataOnDemand.Addendum</Name>
     <ManagementPackName>Windows.Computer.DataOnDemand.Addendum</ManagementPackName>
-    <Version>1.0.0.82</Version>
+    <Version>1.0.0.166</Version>
     <MpFrameworkVersion>v7.0.2</MpFrameworkVersion>
     <MpFrameworkProfile>OM</MpFrameworkProfile>
     <ProductVersion>1.1.0.0</ProductVersion>
@@ -45,16 +45,15 @@
       <Alias>System</Alias>
       <PackageToBundle>false</PackageToBundle>
     </ManagementPackReference>
-    <ManagementPackReference Include="Microsoft.SystemCenter.Visualization.Library">
-      <Alias>Visualization</Alias>
-      <PackageToBundle>false</PackageToBundle>
-    </ManagementPackReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Health Model\Modules\GetComputerDescription.mpx">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Health Model\Modules\GetComputerLastChanges.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Health Model\Modules\GetMSGraphData.mpx">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Health Model\Modules\GetRemoteSOAPServiceInfo.mpx">
@@ -67,6 +66,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Health Model\Tasks\GetComputerDescription.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Health Model\Tasks\GetMSGraphData.mpx">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Health Model\Tasks\GetRemoteSOAPServiceInfo.mpx">
@@ -88,6 +90,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Health Model\Scripts\Get-ComputerLastChanges.ps1" />
     <EmbeddedResource Include="Health Model\Scripts\Get-ComputerDescription.ps1" />
+    <EmbeddedResource Include="Health Model\Scripts\Get-MSGraphData.ps1" />
     <EmbeddedResource Include="Health Model\Scripts\Get-RemoteSOAPServiceInfo.ps1" />
     <EmbeddedResource Include="Health Model\Scripts\Get-SCOMNotificationConfig.ps1" />
   </ItemGroup>
