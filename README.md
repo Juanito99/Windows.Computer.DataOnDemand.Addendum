@@ -44,9 +44,9 @@ Queries Microsoft’s Graph API by extending given OData functions
 ### Downloads:
 
 [ManagementPack-Sealed](
-https://github.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/blob/master/Windows.Computer.DataOnDemand.Addendum/bin/Debug/Windows.Computer.DataOnDemand.Addendum.mbp)
+https://github.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/blob/master/Windows.Computer.DataOnDemand.Addendum/Windows.Computer.DataOnDemand.Addendum/bin/Debug/Windows.Computer.DataOnDemand.Addendum.mpb)
 
-[ManagementPack-UnSealed](https://github.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/blob/master/Windows.Computer.DataOnDemand.Addendum/bin/Debug/Windows.Computer.DataOnDemand.Addendum.xml)
+[ManagementPack-UnSealed](https://github.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/blob/master/Windows.Computer.DataOnDemand.Addendum/Windows.Computer.DataOnDemand.Addendum/bin/Debug/Windows.Computer.DataOnDemand.Addendum.xml)
 
 [Source for VSAE 2017](https://github.com/Juanito99/Windows.Computer.DataOnDemand.Addendum/blob/master/Windows.Computer.DataOnDemand.Addendum/)
 
