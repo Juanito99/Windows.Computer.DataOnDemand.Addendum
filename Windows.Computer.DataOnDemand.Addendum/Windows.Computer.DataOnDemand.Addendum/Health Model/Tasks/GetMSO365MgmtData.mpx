@@ -1,0 +1,46 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+
+  <Monitoring>
+    <Tasks>
+
+      <Task ID="Windows.Computer.DataOnDemand.Addendum.GetMSO365MgmtData.Task" Accessibility="Public" Enabled="true" Target="Windows!Microsoft.Windows.Computer" Timeout="240" Remotable="true">
+        <Category>Operations</Category>
+        <WriteAction ID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphData.PowerShellWriteAction" TypeID="Windows.Computer.DataOnDemand.Addendum.GetMSO365MgmtData.WriteAction">
+          <Format>JSON</Format>
+          <TimeoutSeconds>180</TimeoutSeconds>
+          <WebServiceUrl>https://manage.office.com/api/v1.0/</WebServiceUrl>
+          <GraphQry></GraphQry>
+          <ClientId></ClientId>
+          <TenantId></TenantId>
+          <ClientSecret></ClientSecret>
+          <SortedBy></SortedBy>
+          <FilteredBy></FilteredBy>
+          <AddVisualizationFlag>True</AddVisualizationFlag>
+          <SortDescending></SortDescending>
+          <DisplayItemNumber>10</DisplayItemNumber>
+        </WriteAction>
+      </Task>
+
+    </Tasks>
+  </Monitoring>
+
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSO365MgmtData.Task">
+          <Name>Get-MSO365MgmtData ( Windows Computer DataOnDemand Addendum )</Name>
+          <Description>
+            Retrieves information from MS O365 Mgmt API
+            Note: JSON format is only supported if PowerShell v3 or later is installed on the target server.
+          </Description>
+        </DisplayString>
+
+      </DisplayStrings>
+
+      <KnowledgeArticles></KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+  
+</ManagementPackFragment>

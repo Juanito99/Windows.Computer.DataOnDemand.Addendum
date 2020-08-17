@@ -17,6 +17,7 @@
           <xsd:element name="AddVisualizationFlag" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
           <xsd:element name="SortDescending" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
           <xsd:element name="DisplayItemNumber" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="RefreshCycleMinutes" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
         </Configuration>
         <OverrideableParameters>
           <OverrideableParameter ID="Format" Selector="$Config/Format$" ParameterType="string" />
@@ -30,7 +31,8 @@
           <OverrideableParameter ID="FilteredBy" Selector="$Config/FilteredBy$" ParameterType="string" />
           <OverrideableParameter ID="AddVisualizationFlag" Selector="$Config/AddVisualizationFlag$" ParameterType="string" />
           <OverrideableParameter ID="SortDescending" Selector="$Config/SortDescending$" ParameterType="string" />
-          <OverrideableParameter ID="DisplayItemNumber" Selector="$Config/DisplayItemNumber$" ParameterType="string" />          
+          <OverrideableParameter ID="DisplayItemNumber" Selector="$Config/DisplayItemNumber$" ParameterType="string" />
+          <OverrideableParameter ID="RefreshCycleMinutes" Selector="$Config/RefreshCycleMinutes$" ParameterType="string" />
         </OverrideableParameters>
         <ModuleImplementation Isolation="Any">
           <Composite>
@@ -82,7 +84,11 @@
                   <Parameter>
                     <Name>DisplayItemNumber</Name>
                     <Value>$Config/DisplayItemNumber$</Value>
-                  </Parameter>                  
+                  </Parameter>  
+                  <Parameter>
+                    <Name>RefreshCycleMinutes</Name>
+                    <Value>$Config/RefreshCycleMinutes$</Value>
+                  </Parameter>
                 </Parameters>
                 <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
               </WriteAction>
@@ -110,6 +116,7 @@
           <xsd:element name="AddVisualizationFlag" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
           <xsd:element name="SortDescending" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
           <xsd:element name="DisplayItemNumber" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />          
+          <xsd:element name="RefreshCycleMinutes" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />   
         </Configuration>
         <OverrideableParameters>
           <OverrideableParameter ID="Format" Selector="$Config/Format$" ParameterType="string" />
@@ -123,8 +130,9 @@
           <OverrideableParameter ID="FilteredBy" Selector="$Config/FilteredBy$" ParameterType="string" />
           <OverrideableParameter ID="AddVisualizationFlag" Selector="$Config/AddVisualizationFlag$" ParameterType="string" />
           <OverrideableParameter ID="SortDescending" Selector="$Config/SortDescending$" ParameterType="string" />
-          <OverrideableParameter ID="DisplayItemNumber" Selector="$Config/DisplayItemNumber$" ParameterType="string" />          
-        </OverrideableParameters>
+          <OverrideableParameter ID="DisplayItemNumber" Selector="$Config/DisplayItemNumber$" ParameterType="string" />   
+          <OverrideableParameter ID="RefreshCycleMinutes" Selector="$Config/RefreshCycleMinutes$" ParameterType="string" />
+      </OverrideableParameters>
         <ModuleImplementation Isolation="Any">
           <Composite>
             <MemberModules>
@@ -175,6 +183,10 @@
                   <Parameter>
                     <Name>DisplayItemNumber</Name>
                     <Value>$Config/DisplayItemNumber$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>RefreshCycleMinutes</Name>
+                    <Value>$Config/RefreshCycleMinutes$</Value>
                   </Parameter>
                 </Parameters>
                 <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
@@ -270,6 +282,11 @@
           <Description>Number of items that will be displayed, default is 10</Description>
         </DisplayString>
 
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphData.WriteAction" SubElementID="RefreshCycleMinutes">
+          <Name>RefreshCycleMinutes</Name>
+          <Description>Number of minutes until new query, default is 15</Description>
+        </DisplayString>
+        
               
         <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.WriteAction" >
           <Name>
@@ -341,6 +358,12 @@
           <Name>DisplayItemNumber</Name>
           <Description>Number of items that will be displayed, default is 10</Description>
         </DisplayString>
+
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.WriteAction" SubElementID="RefreshCycleMinutes">
+          <Name>RefreshCycleMinutes</Name>
+          <Description>Number of minutes until new query, default is 15</Description>
+        </DisplayString>
+
 
       </DisplayStrings>
 

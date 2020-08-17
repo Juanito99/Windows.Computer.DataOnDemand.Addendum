@@ -3,7 +3,7 @@
   <Manifest>
     <Identity>
       <ID>Windows.Computer.DataOnDemand.Addendum</ID>
-      <Version>1.0.0.166</Version>
+      <Version>1.0.0.181</Version>
     </Identity>
     <Name>Windows.Computer.DataOnDemand.Addendum</Name>
     <References>
@@ -37,20 +37,20 @@
                 <ScriptName>Get-ComputerDescription.ps1</ScriptName>
                 <ScriptBody><![CDATA[<#
 .SYNOPSIS
-    Get Compupter Description
+	Get Compupter Description
 .DESCRIPTION
-    This script gets the local description and the one from Active Directory
+	This script gets the local description and the one from Active Directory
 .Notes
 	AUTHOR: Ruben Zimmermann @ruben8z
 	LASTEDIT: 2019-12-25
 	REQUIRES: PowerShell Version 2, Windows Management Foundation 4, At least Windows 7 or Windows Server 2008 R2.	
 REMARK:
 This PS script comes with ABSOLUTELY NO WARRANTY; for details see gnu-gpl. This is free software, and you are welcome to redistribute it under certain conditions; see gnu-gpl for details.
-    
+	
 #>
 Param(
-    [ValidateSet("text","csv","json", "list")]
-    [string] $Format = "csv"
+	[ValidateSet("text","csv","json", "list")]
+	[string] $Format = "csv"
 )
 
 
@@ -106,11 +106,11 @@ $myComputerDescObj = New-Object -TypeName PSObject -Property $myComputerDescHash
 if ($Format -eq 'text') {
 	$myComputerDescObj | Format-Table -AutoSize | Out-String -Width 4096 | Write-Host
 } elseif ($Format -eq 'csv') {
-    $myComputerDescObj | ConvertTo-Csv -NoTypeInformation | Out-String -Width 4096 | Write-Host
+	$myComputerDescObj | ConvertTo-Csv -NoTypeInformation | Out-String -Width 4096 | Write-Host
 } elseif ($Format -eq 'json') {
-    $myComputerDescObj | ConvertTo-Json | Out-String -Width 4096 | Write-Host
+	$myComputerDescObj | ConvertTo-Json | Out-String -Width 4096 | Write-Host
 } elseif ($format -eq 'list') {
-    $myComputerDescObj | Format-List | Out-String -Width 4096 | Write-Host
+	$myComputerDescObj | Format-List | Out-String -Width 4096 | Write-Host
 }
 
 # Done. (do not remove blank line following this comment as it can cause problems when script is sent to SCOM agent!)
@@ -148,25 +148,26 @@ if ($Format -eq 'text') {
                 <ScriptName>Get-ComputerLastChanges.ps1</ScriptName>
                 <ScriptBody><![CDATA[<#
 .SYNOPSIS
-    Get Compupter Last Changes
+	Get Compupter Last Changes
 .DESCRIPTION
-    This script gets some last changes such as last installed SW or logged on user.
+	This script gets some last changes such as last installed SW or logged on user.
 .Notes
 	AUTHOR: Ruben Zimmermann @ruben8z
 	LASTEDIT: 2019-12-25
 	REQUIRES: PowerShell Version 2, Windows Management Foundation 4, At least Windows 7 or Windows Server 2008 R2.	
 REMARK:
 This PS script comes with ABSOLUTELY NO WARRANTY; for details see gnu-gpl. This is free software, and you are welcome to redistribute it under certain conditions; see gnu-gpl for details.
-    
+	
 #>
 Param(
-    [ValidateSet("text","csv","json", "list")]
-    [string] $Format = "csv"
+	[ValidateSet("text","csv","json", "list")]
+	[string] $Format = "csv"
 )
 
 
 $ErrorActionPreference = "stop"
-$lastInstallFlag       = 'Fine'
+$lastInstallFlag32     = 'Fine'
+$lastInstallFlag64     = 'Fine'
 
 $regPat         = '[0-9]{8}'
 $bootInfo       = wmic os get lastbootuptime
@@ -188,7 +189,7 @@ try {
 } catch {
 	$lastInstalled32SoftwareInstallDate = 'Not Available'
 	$lastInstalled32SoftwareName        = 'Not Available'
-	$lastInstallFlag                     = 'Error'
+	$lastInstallFlag32                  = 'Error'
 }
   
 try {
@@ -204,21 +205,28 @@ try {
 } catch{
 	$lastInstalled64SoftwareInstallDate  = 'Not Available'
 	$lastInstalled64SoftwareName         = 'Not Available'
-	$lastInstallFlag                     = 'Error'
+	$lastInstallFlag64                   = 'Error'
 }
 
-if ($lastInstallFlag -eq 'Fine')  {
+if ($lastInstallFlag32 -eq 'Fine' -and $lastInstallFlag64 -eq 'Fine')  {
 	if ($lastInstalled32SoftwareInstallDate -gt $lastInstalled64SoftwareInstallDate) {
 		$lastInstalledSoftwareInstallDate = $lastInstalled32SoftwareInstallDate
 		$lastInstalledSoftwareName        = $lastInstalled32SoftwareName		
 	} else {
 		$lastInstalledSoftwareInstallDate = $lastInstalled64SoftwareInstallDate
 		$lastInstalledSoftwareName        = $lastInstalled64SoftwareName		
-	}		
+	}	
+} elseif ($lastInstallFlag32 -eq 'Fine')  {
+	$lastInstalledSoftwareInstallDate = $lastInstalled32SoftwareInstallDate
+	$lastInstalledSoftwareName        = $lastInstalled32SoftwareName		
+} elseif ($lastInstallFlag64 -eq 'Fine')  {
+	$lastInstalledSoftwareInstallDate = $lastInstalled64SoftwareInstallDate
+	$lastInstalledSoftwareName        = $lastInstalled64SoftwareName		
 } else {
 	$lastInstalledSoftwareInstallDate = 'Not Available'
 	$lastInstalledSoftwareName        = 'Not Available'
 }
+
 
 try {
 	$regPat                         = 'KB[0-9]{7}'
@@ -269,13 +277,13 @@ $myComputerDescObj = New-Object -TypeName PSObject -Property $myComputerDescHash
 
 
 if ($Format -eq 'text') {
-    $myComputerDescObj | Format-Table -AutoSize | Out-String -Width 4096 | Write-Host
+	$myComputerDescObj | Format-Table -AutoSize | Out-String -Width 4096 | Write-Host
 } elseif ($Format -eq 'csv') {
-    $myComputerDescObj | ConvertTo-Csv -NoTypeInformation | Out-String -Width 4096 | Write-Host
+	$myComputerDescObj | ConvertTo-Csv -NoTypeInformation | Out-String -Width 4096 | Write-Host
 } elseif ($Format -eq 'json') {
-    $myComputerDescObj | ConvertTo-Json | Out-String -Width 4096 | Write-Host
+	$myComputerDescObj | ConvertTo-Json | Out-String -Width 4096 | Write-Host
 } elseif ($format -eq 'list') {
-    $myComputerDescObj | Format-List | Out-String -Width 4096 | Write-Host
+	$myComputerDescObj | Format-List | Out-String -Width 4096 | Write-Host
 }
 
 # Done. (do not remove blank line following this comment as it can cause problems when script is sent to SCOM agent!)
@@ -311,6 +319,7 @@ if ($Format -eq 'text') {
           <xsd:element name="AddVisualizationFlag" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
           <xsd:element name="SortDescending" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
           <xsd:element name="DisplayItemNumber" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="RefreshCycleMinutes" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
         </Configuration>
         <OverrideableParameters>
           <OverrideableParameter ID="Format" Selector="$Config/Format$" ParameterType="string" />
@@ -325,6 +334,7 @@ if ($Format -eq 'text') {
           <OverrideableParameter ID="AddVisualizationFlag" Selector="$Config/AddVisualizationFlag$" ParameterType="string" />
           <OverrideableParameter ID="SortDescending" Selector="$Config/SortDescending$" ParameterType="string" />
           <OverrideableParameter ID="DisplayItemNumber" Selector="$Config/DisplayItemNumber$" ParameterType="string" />
+          <OverrideableParameter ID="RefreshCycleMinutes" Selector="$Config/RefreshCycleMinutes$" ParameterType="string" />
         </OverrideableParameters>
         <ModuleImplementation Isolation="Any">
           <Composite>
@@ -338,8 +348,8 @@ if ($Format -eq 'text') {
 	Retrieves information from MS Graph / MS Graph Beta and returns JSON or CSV
 .Notes
 	AUTHOR: Ruben Zimmermann @ruben8z
-	LASTEDIT: 2020-07-11
-	REQUIRES: PowerShell Version 2, Windows Management Foundation 4, At least Windows 7 or Windows Server 2008 R2.	
+	LASTEDIT: 2020-08-09
+	REQUIRES: PowerShell Version 4, Windows Management Foundation 4, At least Windows 7 or Windows Server 2008 R2.	
 REMARK:
 This PS script comes with ABSOLUTELY NO WARRANTY; for details see gnu-gpl. This is free software, and you are welcome to redistribute it under certain conditions; see gnu-gpl for details.
 	
@@ -356,7 +366,8 @@ Param(
 	[string]$FilteredBy = '',
 	[string]$addVisualizationFlag = 'true',	
 	[string]$SortDescending = '',	
-	[string]$DisplayItemNumber = ''	
+	[string]$DisplayItemNumber = '',
+	[string]$RefreshCycleMinutes
 )
 
 #$dbgFile = 'C:\Temp\graph.log.txt'
@@ -365,6 +376,48 @@ $api = New-Object -ComObject 'MOM.ScriptAPI'
 
 $ErrorActionPreference = "stop"
 $rtnMsg = ''
+
+$cacheFilePath = "C:\Temp\GraphTmpFiles" 
+
+if ($graphQry -match '\(') { 
+  $graphQryName = ($graphQry -split '\(')[0]  
+} else {
+  $graphQryName = $graphQry
+}
+
+
+$cacheFileSuffix = $graphQryName -replace '/',''
+
+$selectCheck = $false
+
+if ($GraphQry -match '(?i)select') {
+	$qryTmp      = $GraphQry -split 'select='
+	$qryTmp      = $qryTmp[1] -split '&|$' 
+	$qryTmp      = $qryTmp[0] -replace '&|$',''
+	$qryTmp      = $qryTmp -as [string]		
+	if ($qryTmp.Substring($qryTmp.Length -1,1) -eq ',') {
+		$qryTmp = $qryTmp.Substring(0,$qryTmp.Length -1)
+	}
+	$qryTmpArr   = $qryTmp -split ','	
+	$qryTmp      = $qryTmp -replace ',',''
+	$cacheFileSuffix +=  '_' + $qryTmp
+	$selectCheck = $true
+}
+
+	
+$cacheFileName = 'Read-Graph_' + $cacheFileSuffix + '.json'
+
+if (Test-Path -Path $cacheFilePath) {
+  $foo = "directory already exists"
+} else {  
+  $tmpFil = ($cacheFilePath -split '\\')[-1]
+  $tmpDir = $cacheFilePath.Substring(0,($cacheFilePath.Length - $tmpFil.Length) -1)
+  New-Item -ItemType Directory -Path $tmpDir -Name $tmpFil -Force 
+}
+
+$cacheFile = Join-Path -Path $cacheFilePath -ChildPath $cacheFileName
+
+$runQry = $false
 
 if ($WebServiceUrl -match "(?i)http(s)?") {
 	$foo = 'proceed'
@@ -425,6 +478,25 @@ if ($SortDescending -match '(?i)true|false|$true|$false') {
 	$rtnMsg = 'SortDescindg value is invalid.' +  $SortDescending
 }
 
+if ($RefreshCycleMinutes -match '\d') {
+	$foo = 'bar'
+} else {
+	$rtnMsg = 'RefreshCycleMinutes is not a number. Invalid.' +  $RefreshCycleMinutes
+}
+
+if ([System.IO.File]::Exists($cacheFile)) {
+  $cacheFileObj = Get-Item -Path $cacheFile
+  $cacheFileLwt = $cacheFileObj.LastWriteTime 
+  $timeDiff = (New-TimeSpan -Start $cacheFileLwt -End (Get-date)).TotalMinutes -as [int]
+  if ($timeDiff -gt $RefreshCycleMinutes) {
+	$runQry = $true
+  } else {
+	$runQry = $false
+  }
+} else {
+  $runQry = $true
+}
+
 
 $api.LogScriptEvent('Get-MSGraphData.ps1',602,1,"URL $($WebServiceUrl), TenantID $($TenantId) ClientID $($ClientId) FilteredBy $($FilteredBy) Sortedby $($SortedBy) GraphQry $($GraphQry)")
 
@@ -452,12 +524,29 @@ $uri = $WebServiceUrl + $GraphQry
 
 $api.LogScriptEvent('Get-MSGraphData.ps1',602,2,"Qury URL: $($uri)")
 
-try {	
-	$query = Invoke-RestMethod -Method Get -Uri $uri -ContentType "application/json" -Headers @{Authorization = "Bearer $token"} -ErrorAction Stop -UseBasicParsing 
-} catch {	
-	$rtnMsg  = 'Failure during InvokeWebRequest  ' + $Error
-	$rtnMsg += 'URI: ' + $uri 
-}
+if ($runQry) {
+
+	try {	
+		$query = Invoke-RestMethod -Method Get -Uri $uri -ContentType "application/json" -Headers @{Authorization = "Bearer $token"} -ErrorAction Stop -UseBasicParsing 
+	} catch {	
+		$rtnMsg  = 'Failure during InvokeWebRequest  ' + $Error
+		$rtnMsg += 'URI: ' + $uri 
+	}
+  
+	$query = $query.value
+
+	if ($selectCheck) {
+		$query | Select-Object -Property $qryTmpArr | ConvertTo-Json | Out-File -FilePath $cacheFile -Force 
+	} else {
+		$query | ConvertTo-Json | Out-File -FilePath $cacheFile -Force 
+	}		
+
+} else {
+
+  $query =  Get-Content -Path $cacheFile | ConvertFrom-Json
+  
+} #end if($runQry)
+
 
 #$query  | Out-File -FilePath $dbgFile -Append
 
@@ -466,18 +555,21 @@ $api.LogScriptEvent('Get-MSGraphData.ps1',606,1,"rtnMsg $($rtnMsg)")
 $allElements = New-Object -TypeName 'System.Collections.Generic.List[PSObject]'
 
 $elementCount = 0
-$elementCount = $query.value.count
+$elementCount = $query.count
 
-$query.value  | ForEach-Object { $allElements.Add($_) }
+$query | ForEach-Object { $allElements.Add($_) }
 
-$api.LogScriptEvent('Get-MSGraphData.ps1',602,1,"Answ Value $($query.value.count) ")
+$api.LogScriptEvent('Get-MSGraphData.ps1',602,1,"Answ Value $($query.count) ")
 
 if ($elementCount -gt 1) {
+
+	$FilteredNumber = 0
 
 	if ($FilteredBy -ne '') {
 		if ($FilteredBy -match '(?i)[a-zA-Z$_\.''" -]{1,}\s{1,}-(ieq|ine|eq|ne|gt|ge|lt|le|or|and|like|notlike|match|notmatch)\s{1,}[a-zA-Z$_\.''" -]{1,}')  {
 			$FilterFor = $ExecutionContext.InvokeCommand.NewScriptBlock($FilteredBy)				
 			$allElements = $allElements | Where-Object -FilterScript $FilterFor
+			$FilteredNumber = $allElements.Count
 			$api.LogScriptEvent('Get-MSGraphData.ps1',603,2,"regex passed for $FilteredBy")
 		} else {
 			$api.LogScriptEvent('Get-MSGraphData.ps1',603,2,"regex NOT passed for $FilteredBy")
@@ -506,6 +598,7 @@ if ($elementCount -gt 1) {
 			if ($i % 2 -eq 0) {
 				$itmElementFlagHash = @{'Counter' = "## $($i)"}
 				$itmElementFlagHash.Add('TotalNumber', $elementCount)
+				$itmElementFlagHash.Add('FilteredNumber', $FilteredNumber)
 				$tmpObject = $allElements[$i] 
 				$objMembers = $tmpObject.psobject.Members | Where-Object {$_.MemberType -eq 'NoteProperty'}
 				for ($j = 0; $j -lt $objMembers.Count; $j++) {
@@ -514,6 +607,7 @@ if ($elementCount -gt 1) {
 			} else {
 				$itmElementFlagHash = @{'Counter' = "$($i)"}      
 				$itmElementFlagHash.Add('TotalNumber', $elementCount)
+				$itmElementFlagHash.Add('FilteredNumber', $FilteredNumber)
 				$tmpObject = $allElements[$i] 
 				$objMembers = $tmpObject.psobject.Members | Where-Object {$_.MemberType -eq 'NoteProperty'}
 				for ($j = 0; $j -lt $objMembers.Count; $j++) {
@@ -529,32 +623,37 @@ if ($elementCount -gt 1) {
 		$allElements = $null
 		$allElements = $allElementsVis
 
-	} #end if ($addVisualizationFlag -ieq 'True')
+	} else {
 
-} else {
-
-	$allElementsNoVis = New-Object -TypeName 'System.Collections.Generic.List[psobject]'
-
-	for ($i=0; $i -lt $allElements.Count; $i++) {
-
+		$allElementsVis = New-Object -TypeName 'System.Collections.Generic.List[psobject]'
+	
+		for ($i=0; $i -lt $allElements.Count; $i++) {
 			
-		$itmElementFlagHash = @{'Counter' = "## $($i)"}           
-		$tmpObject = $allElements[$i] 
-		$objMembers = $tmpObject.psobject.Members | Where-Object {$_.MemberType -eq 'NoteProperty'}
-		for ($j = 0; $j -lt $objMembers.Count; $j++) {
-			$itmElementFlagHash.Add($($objMembers[$j].Name), "## $($objMembers[$j].Value)")
-		}        
+			$itmElementFlagHash = @{'Counter' = "$($i)"}      
+			$itmElementFlagHash.Add('TotalNumber', $elementCount)
+			$itmElementFlagHash.Add('FilteredNumber', $FilteredNumber)
+			$tmpObject = $allElements[$i] 
+			$objMembers = $tmpObject.psobject.Members | Where-Object {$_.MemberType -eq 'NoteProperty'}
+			for ($j = 0; $j -lt $objMembers.Count; $j++) {
+				$itmElementFlagHash.Add($($objMembers[$j].Name), "$($objMembers[$j].Value)")
+			}
+			
 		
-		$itmElementFlagHash.Add('TotalNumber', $elementCount)
-		$itmElementFlagObj = New-Object -TypeName PSObject -Property $itmElementFlagHash
-		$allElementsNoVis.Add($itmElementFlagObj)
+			$itmElementFlagObj = New-Object -TypeName PSObject -Property $itmElementFlagHash
+			$allElementsVis.Add($itmElementFlagObj)
 
-	} #end for ($i=0; $i -lt $allElements.Count; $i++) {}
+		} #end for ($i=0; $i -lt $allElements.Count; $i++) {}
 
-	$allElements = $null
-	$allElements = $allElementsNoVis
+		$allElements = $null
+		$allElements = $allElementsVis
 
-} #end  ($query.value.count -gt 1) 
+	} 	#end if ($addVisualizationFlag -ieq 'True')
+
+} elseif  ($elementCount -eq 1) {
+	
+	$foo = 'bar, just keeping allElements'
+
+} #end  if ($elementCount -gt 1)
 
 
 
@@ -627,6 +726,10 @@ if ($Error) {
                     <Name>DisplayItemNumber</Name>
                     <Value>$Config/DisplayItemNumber$</Value>
                   </Parameter>
+                  <Parameter>
+                    <Name>RefreshCycleMinutes</Name>
+                    <Value>$Config/RefreshCycleMinutes$</Value>
+                  </Parameter>
                 </Parameters>
                 <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
               </WriteAction>
@@ -640,6 +743,443 @@ if ($Error) {
         <InputType>System!System.BaseData</InputType>
       </WriteActionModuleType>
       <WriteActionModuleType ID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.WriteAction" Accessibility="Public" Batching="false">
+        <Configuration>
+          <xsd:element name="Format" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="TimeoutSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="WebServiceUrl" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="GraphQry" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="ClientId" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="TenantId" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="ClientSecret" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="SortedBy" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="FilteredBy" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="AddVisualizationFlag" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="SortDescending" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="DisplayItemNumber" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element name="RefreshCycleMinutes" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+        </Configuration>
+        <OverrideableParameters>
+          <OverrideableParameter ID="Format" Selector="$Config/Format$" ParameterType="string" />
+          <OverrideableParameter ID="TimeoutSeconds" Selector="$Config/TimeoutSeconds$" ParameterType="int" />
+          <OverrideableParameter ID="WebServiceUrl" Selector="$Config/WebServiceUrl$" ParameterType="string" />
+          <OverrideableParameter ID="GraphQry" Selector="$Config/GraphQry$" ParameterType="string" />
+          <OverrideableParameter ID="ClientId" Selector="$Config/ClientId$" ParameterType="string" />
+          <OverrideableParameter ID="TenantId" Selector="$Config/TenantId$" ParameterType="string" />
+          <OverrideableParameter ID="ClientSecret" Selector="$Config/ClientSecret$" ParameterType="string" />
+          <OverrideableParameter ID="SortedBy" Selector="$Config/SortedBy$" ParameterType="string" />
+          <OverrideableParameter ID="FilteredBy" Selector="$Config/FilteredBy$" ParameterType="string" />
+          <OverrideableParameter ID="AddVisualizationFlag" Selector="$Config/AddVisualizationFlag$" ParameterType="string" />
+          <OverrideableParameter ID="SortDescending" Selector="$Config/SortDescending$" ParameterType="string" />
+          <OverrideableParameter ID="DisplayItemNumber" Selector="$Config/DisplayItemNumber$" ParameterType="string" />
+          <OverrideableParameter ID="RefreshCycleMinutes" Selector="$Config/RefreshCycleMinutes$" ParameterType="string" />
+        </OverrideableParameters>
+        <ModuleImplementation Isolation="Any">
+          <Composite>
+            <MemberModules>
+              <WriteAction ID="PowerShellWriteAction" TypeID="Windows!Microsoft.Windows.PowerShellWriteAction">
+                <ScriptName>Get-MSGraphData</ScriptName>
+                <ScriptBody><![CDATA[<#
+.SYNOPSIS
+	Retrieves information from MS Graph / MS Graph Beta
+.DESCRIPTION
+	Retrieves information from MS Graph / MS Graph Beta and returns JSON or CSV
+.Notes
+	AUTHOR: Ruben Zimmermann @ruben8z
+	LASTEDIT: 2020-08-09
+	REQUIRES: PowerShell Version 4, Windows Management Foundation 4, At least Windows 7 or Windows Server 2008 R2.	
+REMARK:
+This PS script comes with ABSOLUTELY NO WARRANTY; for details see gnu-gpl. This is free software, and you are welcome to redistribute it under certain conditions; see gnu-gpl for details.
+	
+#>
+Param(
+	[ValidateSet('text','list','json')]
+	[string]$Format = "json",
+	[string]$WebServiceUrl = '',
+	[string]$GraphQry = '',
+	[string]$ClientId = '',
+	[string]$TenantId = '',
+	[string]$ClientSecret = '',	
+	[string]$SortedBy = '',
+	[string]$FilteredBy = '',
+	[string]$addVisualizationFlag = 'true',	
+	[string]$SortDescending = '',	
+	[string]$DisplayItemNumber = '',
+	[string]$RefreshCycleMinutes
+)
+
+#$dbgFile = 'C:\Temp\graph.log.txt'
+
+$api = New-Object -ComObject 'MOM.ScriptAPI'
+
+$ErrorActionPreference = "stop"
+$rtnMsg = ''
+
+$cacheFilePath = "C:\Temp\GraphTmpFiles" 
+
+if ($graphQry -match '\(') { 
+  $graphQryName = ($graphQry -split '\(')[0]  
+} else {
+  $graphQryName = $graphQry
+}
+
+
+$cacheFileSuffix = $graphQryName -replace '/',''
+
+$selectCheck = $false
+
+if ($GraphQry -match '(?i)select') {
+	$qryTmp      = $GraphQry -split 'select='
+	$qryTmp      = $qryTmp[1] -split '&|$' 
+	$qryTmp      = $qryTmp[0] -replace '&|$',''
+	$qryTmp      = $qryTmp -as [string]		
+	if ($qryTmp.Substring($qryTmp.Length -1,1) -eq ',') {
+		$qryTmp = $qryTmp.Substring(0,$qryTmp.Length -1)
+	}
+	$qryTmpArr   = $qryTmp -split ','	
+	$qryTmp      = $qryTmp -replace ',',''
+	$cacheFileSuffix +=  '_' + $qryTmp
+	$selectCheck = $true
+}
+
+	
+$cacheFileName = 'Read-Graph_' + $cacheFileSuffix + '.json'
+
+if (Test-Path -Path $cacheFilePath) {
+  $foo = "directory already exists"
+} else {  
+  $tmpFil = ($cacheFilePath -split '\\')[-1]
+  $tmpDir = $cacheFilePath.Substring(0,($cacheFilePath.Length - $tmpFil.Length) -1)
+  New-Item -ItemType Directory -Path $tmpDir -Name $tmpFil -Force 
+}
+
+$cacheFile = Join-Path -Path $cacheFilePath -ChildPath $cacheFileName
+
+$runQry = $false
+
+if ($WebServiceUrl -match "(?i)http(s)?") {
+	$foo = 'proceed'
+} else {
+	$rtnMsg = 'WebService not matching URL' + $WebServiceUrl
+}
+
+if ([guid]::TryParse($ClientId, $([ref][guid]::Empty))) {
+	$foo = 'proceed'
+} else {
+	$rtnMsg = 'ClientId not matching GUID' + $ClientId
+}
+
+if ([guid]::TryParse($TenantId, $([ref][guid]::Empty))) {
+	$foo = 'proceed'
+} else {
+	$rtnMsg = 'TenantId not matching GUID' + $TenantId
+}
+
+if ($ClientSecret.Length -gt 11) {
+	$foo = 'proceed'
+} else {
+	$rtnMsg = 'ClientSecret too short. Use at least 12 characters! ' + $ClientSecret
+}
+
+if ($FilteredBy -match "{}") {
+	$FilteredBy = $FilteredBy -replace ('{|}','')
+} else {
+	$foo = 'bar'
+}
+
+if ($GraphQry.Length -gt 11) {
+	$foo = 'proceed'
+} else {
+	$rtnMsg = 'GraphQry appears to be invalid. Too short.' +  $GraphQry
+}
+
+if ($GraphQry.Substring(0,1) -eq "/") {
+	$foo = 'proceed'
+} else {
+	$GraphQry = '/' +  $GraphQry
+}
+
+if ($GraphQry -match '&amp;') {
+	$GraphQry = $GraphQry -replace '&amp;','&'    
+	$GraphQry = $GraphQry -replace '`',''    
+}
+
+if ($DisplayItemNumber -match '\d') {
+	$foo = 'bar'
+} else {
+	$rtnMsg = 'DisplayItemNumber is not a number. Invalid.' +  $DisplayItemNumber
+}
+
+if ($SortDescending -match '(?i)true|false|$true|$false') {
+	$foo = 'bar'
+} else {
+	$rtnMsg = 'SortDescindg value is invalid.' +  $SortDescending
+}
+
+if ($RefreshCycleMinutes -match '\d') {
+	$foo = 'bar'
+} else {
+	$rtnMsg = 'RefreshCycleMinutes is not a number. Invalid.' +  $RefreshCycleMinutes
+}
+
+if ([System.IO.File]::Exists($cacheFile)) {
+  $cacheFileObj = Get-Item -Path $cacheFile
+  $cacheFileLwt = $cacheFileObj.LastWriteTime 
+  $timeDiff = (New-TimeSpan -Start $cacheFileLwt -End (Get-date)).TotalMinutes -as [int]
+  if ($timeDiff -gt $RefreshCycleMinutes) {
+	$runQry = $true
+  } else {
+	$runQry = $false
+  }
+} else {
+  $runQry = $true
+}
+
+
+$api.LogScriptEvent('Get-MSGraphData.ps1',602,1,"URL $($WebServiceUrl), TenantID $($TenantId) ClientID $($ClientId) FilteredBy $($FilteredBy) Sortedby $($SortedBy) GraphQry $($GraphQry)")
+
+# Construct URI
+$uri = "https://login.microsoftonline.com/$TenantId/oauth2/v2.0/token"
+
+# Construct Body
+$body = @{
+	client_id     = $ClientId
+	scope         = "https://graph.microsoft.com/.default"
+	client_secret = $ClientSecret
+	grant_type    = "client_credentials"
+}
+
+# Get OAuth 2.0 Token
+$tokenRequest = Invoke-WebRequest -Method Post -Uri $uri -ContentType "application/x-www-form-urlencoded" -Body $body -UseBasicParsing
+
+# Access Token
+$token  = ($tokenRequest.Content | ConvertFrom-Json).access_token
+
+$uri = $WebServiceUrl + $GraphQry	
+
+#"165"| Out-File -FilePath $dbgFile -Append
+#$uri  | Out-File -FilePath $dbgFile -Append
+
+$api.LogScriptEvent('Get-MSGraphData.ps1',602,2,"Qury URL: $($uri)")
+
+if ($runQry) {
+
+	try {	
+		$query = Invoke-RestMethod -Method Get -Uri $uri -ContentType "application/json" -Headers @{Authorization = "Bearer $token"} -ErrorAction Stop -UseBasicParsing 
+	} catch {	
+		$rtnMsg  = 'Failure during InvokeWebRequest  ' + $Error
+		$rtnMsg += 'URI: ' + $uri 
+	}
+  
+	$query = $query.value
+
+	if ($selectCheck) {
+		$query | Select-Object -Property $qryTmpArr | ConvertTo-Json | Out-File -FilePath $cacheFile -Force 
+	} else {
+		$query | ConvertTo-Json | Out-File -FilePath $cacheFile -Force 
+	}		
+
+} else {
+
+  $query =  Get-Content -Path $cacheFile | ConvertFrom-Json
+  
+} #end if($runQry)
+
+
+#$query  | Out-File -FilePath $dbgFile -Append
+
+$api.LogScriptEvent('Get-MSGraphData.ps1',606,1,"rtnMsg $($rtnMsg)")
+
+$allElements = New-Object -TypeName 'System.Collections.Generic.List[PSObject]'
+
+$elementCount = 0
+$elementCount = $query.count
+
+$query | ForEach-Object { $allElements.Add($_) }
+
+$api.LogScriptEvent('Get-MSGraphData.ps1',602,1,"Answ Value $($query.count) ")
+
+if ($elementCount -gt 1) {
+
+	$FilteredNumber = 0
+
+	if ($FilteredBy -ne '') {
+		if ($FilteredBy -match '(?i)[a-zA-Z$_\.''" -]{1,}\s{1,}-(ieq|ine|eq|ne|gt|ge|lt|le|or|and|like|notlike|match|notmatch)\s{1,}[a-zA-Z$_\.''" -]{1,}')  {
+			$FilterFor = $ExecutionContext.InvokeCommand.NewScriptBlock($FilteredBy)				
+			$allElements = $allElements | Where-Object -FilterScript $FilterFor
+			$FilteredNumber = $allElements.Count
+			$api.LogScriptEvent('Get-MSGraphData.ps1',603,2,"regex passed for $FilteredBy")
+		} else {
+			$api.LogScriptEvent('Get-MSGraphData.ps1',603,2,"regex NOT passed for $FilteredBy")
+		}
+	}
+
+	if ($SortedBy -match '(?i)\w{1,}') {
+		$allElements = $allElements | Sort-Object -Property $SortedBy 	
+		if ($SortDescending -match '(?i)true|false|$true|$false') {
+			if ($SortDescending -match '(?i)true|$true') {
+				$allElements = $allElements | Sort-Object -Property $SortedBy -Descending
+			} 
+		}
+	}
+
+	if ($DisplayItemNumber -match '\d' -and $DisplayItemNumber -gt 0) {
+		$allElements = $allElements | Select-Object -First $DisplayItemNumber
+	}	
+
+	if ($addVisualizationFlag -ieq 'True') {	
+
+		$allElementsVis = New-Object -TypeName 'System.Collections.Generic.List[psobject]'
+	
+		for ($i=0; $i -lt $allElements.Count; $i++) {
+
+			if ($i % 2 -eq 0) {
+				$itmElementFlagHash = @{'Counter' = "## $($i)"}
+				$itmElementFlagHash.Add('TotalNumber', $elementCount)
+				$itmElementFlagHash.Add('FilteredNumber', $FilteredNumber)
+				$tmpObject = $allElements[$i] 
+				$objMembers = $tmpObject.psobject.Members | Where-Object {$_.MemberType -eq 'NoteProperty'}
+				for ($j = 0; $j -lt $objMembers.Count; $j++) {
+					$itmElementFlagHash.Add($($objMembers[$j].Name), "## $($objMembers[$j].Value)")
+				}            
+			} else {
+				$itmElementFlagHash = @{'Counter' = "$($i)"}      
+				$itmElementFlagHash.Add('TotalNumber', $elementCount)
+				$itmElementFlagHash.Add('FilteredNumber', $FilteredNumber)
+				$tmpObject = $allElements[$i] 
+				$objMembers = $tmpObject.psobject.Members | Where-Object {$_.MemberType -eq 'NoteProperty'}
+				for ($j = 0; $j -lt $objMembers.Count; $j++) {
+					$itmElementFlagHash.Add($($objMembers[$j].Name), "$($objMembers[$j].Value)")
+				}
+			}
+		
+			$itmElementFlagObj = New-Object -TypeName PSObject -Property $itmElementFlagHash
+			$allElementsVis.Add($itmElementFlagObj)
+
+		} #end for ($i=0; $i -lt $allElements.Count; $i++) {}
+
+		$allElements = $null
+		$allElements = $allElementsVis
+
+	} else {
+
+		$allElementsVis = New-Object -TypeName 'System.Collections.Generic.List[psobject]'
+	
+		for ($i=0; $i -lt $allElements.Count; $i++) {
+			
+			$itmElementFlagHash = @{'Counter' = "$($i)"}      
+			$itmElementFlagHash.Add('TotalNumber', $elementCount)
+			$itmElementFlagHash.Add('FilteredNumber', $FilteredNumber)
+			$tmpObject = $allElements[$i] 
+			$objMembers = $tmpObject.psobject.Members | Where-Object {$_.MemberType -eq 'NoteProperty'}
+			for ($j = 0; $j -lt $objMembers.Count; $j++) {
+				$itmElementFlagHash.Add($($objMembers[$j].Name), "$($objMembers[$j].Value)")
+			}
+			
+		
+			$itmElementFlagObj = New-Object -TypeName PSObject -Property $itmElementFlagHash
+			$allElementsVis.Add($itmElementFlagObj)
+
+		} #end for ($i=0; $i -lt $allElements.Count; $i++) {}
+
+		$allElements = $null
+		$allElements = $allElementsVis
+
+	} 	#end if ($addVisualizationFlag -ieq 'True')
+
+} elseif  ($elementCount -eq 1) {
+	
+	$foo = 'bar, just keeping allElements'
+
+} #end  if ($elementCount -gt 1)
+
+
+
+if ($Format -ieq 'text') {
+	$allElements | Format-Table -AutoSize | Out-String -Width 4096 | Write-Host
+} elseif ($Format -ieq 'json') {
+	$allElements | ConvertTo-Json | Out-String -Width 4096 | Write-Host
+} elseif ($format -ieq 'list') {
+	$allElements | Format-List | Out-String -Width 4096 | Write-Host
+}
+
+if ($Error) {
+	$rtnMsg += " error count: $($Error.Count) "
+	$rtnMsg += " --- "
+	if ($Error.Count -gt 0) {
+		for ($l = 0; $l -lt $($Error.count); $l++ ) {
+			$rtnMsg += " Error No $l $($Error[$l]) " 
+		}
+	}
+	$api.LogScriptEvent('Get-MSGraphData.ps1',607,1,$rtnMsg)
+} else {
+	$api.LogScriptEvent('Get-MSGraphData.ps1',607,4,"no error!")
+}
+
+
+# Done. (do not remove blank line following this comment as it can cause problems when script is sent to SCOM agent!)
+]]></ScriptBody>
+                <Parameters>
+                  <Parameter>
+                    <Name>Format</Name>
+                    <Value>$Config/Format$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>WebServiceUrl</Name>
+                    <Value>$Config/WebServiceUrl$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>GraphQry</Name>
+                    <Value>$Config/GraphQry$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>ClientId</Name>
+                    <Value>$Config/ClientId$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>TenantId</Name>
+                    <Value>$Config/TenantId$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>ClientSecret</Name>
+                    <Value>$Config/ClientSecret$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>SortedBy</Name>
+                    <Value>$Config/SortedBy$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>FilteredBy</Name>
+                    <Value>$Config/FilteredBy$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>AddVisualizationFlag</Name>
+                    <Value>$Config/AddVisualizationFlag$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>SortDescending</Name>
+                    <Value>$Config/SortDescending$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>DisplayItemNumber</Name>
+                    <Value>$Config/DisplayItemNumber$</Value>
+                  </Parameter>
+                  <Parameter>
+                    <Name>RefreshCycleMinutes</Name>
+                    <Value>$Config/RefreshCycleMinutes$</Value>
+                  </Parameter>
+                </Parameters>
+                <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
+              </WriteAction>
+            </MemberModules>
+            <Composition>
+              <Node ID="PowerShellWriteAction" />
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>System!System.BaseData</OutputType>
+        <InputType>System!System.BaseData</InputType>
+      </WriteActionModuleType>
+      <WriteActionModuleType ID="Windows.Computer.DataOnDemand.Addendum.GetMSO365MgmtData.WriteAction" Accessibility="Public" Batching="false">
         <Configuration>
           <xsd:element name="Format" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
           <xsd:element name="TimeoutSeconds" type="xsd:integer" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
@@ -672,16 +1212,16 @@ if ($Error) {
           <Composite>
             <MemberModules>
               <WriteAction ID="PowerShellWriteAction" TypeID="Windows!Microsoft.Windows.PowerShellWriteAction">
-                <ScriptName>Get-MSGraphData</ScriptName>
+                <ScriptName>Get-MSO365MgmtData</ScriptName>
                 <ScriptBody><![CDATA[<#
 .SYNOPSIS
-	Retrieves information from MS Graph / MS Graph Beta
+	Retrieves information from MS O365 Management API
 .DESCRIPTION
-	Retrieves information from MS Graph / MS Graph Beta and returns JSON or CSV
+	Retrieves information from MS O365 Management API and returns JSON or CSV	
 .Notes
 	AUTHOR: Ruben Zimmermann @ruben8z
-	LASTEDIT: 2020-07-11
-	REQUIRES: PowerShell Version 2, Windows Management Foundation 4, At least Windows 7 or Windows Server 2008 R2.	
+	LASTEDIT: 2020-08-06
+	REQUIRES: PowerShell Version 5, Windows Management Foundation 4, At least Windows 10 or Windows Server 20012
 REMARK:
 This PS script comes with ABSOLUTELY NO WARRANTY; for details see gnu-gpl. This is free software, and you are welcome to redistribute it under certain conditions; see gnu-gpl for details.
 	
@@ -761,49 +1301,32 @@ if ($DisplayItemNumber -match '\d') {
 	$rtnMsg = 'DisplayItemNumber is not a number. Invalid.' +  $DisplayItemNumber
 }
 
-if ($SortDescending -match '(?i)true|false|$true|$false') {
-	$foo = 'bar'
-} else {
-	$rtnMsg = 'SortDescindg value is invalid.' +  $SortDescending
-}
+$api.LogScriptEvent('Get-MSO365MgmtData.ps1',802,1,"URL $($WebServiceUrl), TenantID $($TenantId) ClientID $($ClientId) FilteredBy $($FilteredBy) Sortedby $($SortedBy) GraphQry $($GraphQry)")
 
-
-$api.LogScriptEvent('Get-MSGraphData.ps1',602,1,"URL $($WebServiceUrl), TenantID $($TenantId) ClientID $($ClientId) FilteredBy $($FilteredBy) Sortedby $($SortedBy) GraphQry $($GraphQry)")
-
-# Construct URI
-$uri = "https://login.microsoftonline.com/$TenantId/oauth2/v2.0/token"
-
-# Construct Body
 $body = @{
-	client_id     = $ClientId
-	scope         = "https://graph.microsoft.com/.default"
-	client_secret = $ClientSecret
-	grant_type    = "client_credentials"
+  grant_type    = "client_credentials"
+  resource      = "https://manage.office.com"
+  client_id     = $clientId
+  client_secret = $clientSecret
 }
 
-# Get OAuth 2.0 Token
-$tokenRequest = Invoke-WebRequest -Method Post -Uri $uri -ContentType "application/x-www-form-urlencoded" -Body $body -UseBasicParsing
+$uri = $WebServiceUrl + $TenantId + $GraphQry
 
-# Access Token
-$token  = ($tokenRequest.Content | ConvertFrom-Json).access_token
-
-$uri = $WebServiceUrl + $GraphQry	
-
-#"165"| Out-File -FilePath $dbgFile -Append
-#$uri  | Out-File -FilePath $dbgFile -Append
-
-$api.LogScriptEvent('Get-MSGraphData.ps1',602,2,"Qury URL: $($uri)")
+$api.LogScriptEvent('Get-MSO365MgmtData.ps1',802,2,"Qury URL: $($uri)")
 
 try {	
-	$query = Invoke-RestMethod -Method Get -Uri $uri -ContentType "application/json" -Headers @{Authorization = "Bearer $token"} -ErrorAction Stop -UseBasicParsing 
+	$oauth = Invoke-RestMethod -Method Post -Uri "https://login.microsoftonline.com/$($tenantID)/oauth2/token?api-version=1.0" -Body $body -UseBasicParsing
+	$token = @{'Authorization' = "$($oauth.token_type) $($oauth.access_token)" }
+
+	$query = Invoke-RestMethod -Uri $uri -Headers $token -Method Get
+
 } catch {	
 	$rtnMsg  = 'Failure during InvokeWebRequest  ' + $Error
 	$rtnMsg += 'URI: ' + $uri 
 }
 
-#$query  | Out-File -FilePath $dbgFile -Append
 
-$api.LogScriptEvent('Get-MSGraphData.ps1',606,1,"rtnMsg $($rtnMsg)")
+#$api.LogScriptEvent('Get-MSO365MgmtData.ps1',806,1,"rtnMsg $($rtnMsg)")
 
 $allElements = New-Object -TypeName 'System.Collections.Generic.List[PSObject]'
 
@@ -812,17 +1335,20 @@ $elementCount = $query.value.count
 
 $query.value  | ForEach-Object { $allElements.Add($_) }
 
-$api.LogScriptEvent('Get-MSGraphData.ps1',602,1,"Answ Value $($query.value.count) ")
+#$api.LogScriptEvent('Get-MSO365MgmtData.ps1',802,1,"Answ Value $($query.value.count) ")
 
 if ($elementCount -gt 1) {
+
+	$FilteredNumber = 0
 
 	if ($FilteredBy -ne '') {
 		if ($FilteredBy -match '(?i)[a-zA-Z$_\.''" -]{1,}\s{1,}-(ieq|ine|eq|ne|gt|ge|lt|le|or|and|like|notlike|match|notmatch)\s{1,}[a-zA-Z$_\.''" -]{1,}')  {
 			$FilterFor = $ExecutionContext.InvokeCommand.NewScriptBlock($FilteredBy)				
 			$allElements = $allElements | Where-Object -FilterScript $FilterFor
-			$api.LogScriptEvent('Get-MSGraphData.ps1',603,2,"regex passed for $FilteredBy")
+			$FilteredNumber = $allElements.Count
+#			$api.LogScriptEvent('Get-MSO365MgmtData.ps1',603,2,"regex passed for $FilteredBy")
 		} else {
-			$api.LogScriptEvent('Get-MSGraphData.ps1',603,2,"regex NOT passed for $FilteredBy")
+			$api.LogScriptEvent('Get-MSO365MgmtData.ps1',603,2,"regex NOT passed for $FilteredBy")
 		}
 	}
 
@@ -848,6 +1374,7 @@ if ($elementCount -gt 1) {
 			if ($i % 2 -eq 0) {
 				$itmElementFlagHash = @{'Counter' = "## $($i)"}
 				$itmElementFlagHash.Add('TotalNumber', $elementCount)
+				$itmElementFlagHash.Add('FilteredNumber', $FilteredNumber)
 				$tmpObject = $allElements[$i] 
 				$objMembers = $tmpObject.psobject.Members | Where-Object {$_.MemberType -eq 'NoteProperty'}
 				for ($j = 0; $j -lt $objMembers.Count; $j++) {
@@ -856,6 +1383,7 @@ if ($elementCount -gt 1) {
 			} else {
 				$itmElementFlagHash = @{'Counter' = "$($i)"}      
 				$itmElementFlagHash.Add('TotalNumber', $elementCount)
+				$itmElementFlagHash.Add('FilteredNumber', $FilteredNumber)
 				$tmpObject = $allElements[$i] 
 				$objMembers = $tmpObject.psobject.Members | Where-Object {$_.MemberType -eq 'NoteProperty'}
 				for ($j = 0; $j -lt $objMembers.Count; $j++) {
@@ -871,32 +1399,37 @@ if ($elementCount -gt 1) {
 		$allElements = $null
 		$allElements = $allElementsVis
 
-	} #end if ($addVisualizationFlag -ieq 'True')
+	} else {
 
-} else {
-
-	$allElementsNoVis = New-Object -TypeName 'System.Collections.Generic.List[psobject]'
-
-	for ($i=0; $i -lt $allElements.Count; $i++) {
-
+		$allElementsVis = New-Object -TypeName 'System.Collections.Generic.List[psobject]'
+	
+		for ($i=0; $i -lt $allElements.Count; $i++) {
 			
-		$itmElementFlagHash = @{'Counter' = "## $($i)"}           
-		$tmpObject = $allElements[$i] 
-		$objMembers = $tmpObject.psobject.Members | Where-Object {$_.MemberType -eq 'NoteProperty'}
-		for ($j = 0; $j -lt $objMembers.Count; $j++) {
-			$itmElementFlagHash.Add($($objMembers[$j].Name), "## $($objMembers[$j].Value)")
-		}        
+			$itmElementFlagHash = @{'Counter' = "$($i)"}      
+			$itmElementFlagHash.Add('TotalNumber', $elementCount)
+			$itmElementFlagHash.Add('FilteredNumber', $FilteredNumber)
+			$tmpObject = $allElements[$i] 
+			$objMembers = $tmpObject.psobject.Members | Where-Object {$_.MemberType -eq 'NoteProperty'}
+			for ($j = 0; $j -lt $objMembers.Count; $j++) {
+				$itmElementFlagHash.Add($($objMembers[$j].Name), "$($objMembers[$j].Value)")
+			}
+			
 		
-		$itmElementFlagHash.Add('TotalNumber', $elementCount)
-		$itmElementFlagObj = New-Object -TypeName PSObject -Property $itmElementFlagHash
-		$allElementsNoVis.Add($itmElementFlagObj)
+			$itmElementFlagObj = New-Object -TypeName PSObject -Property $itmElementFlagHash
+			$allElementsVis.Add($itmElementFlagObj)
 
-	} #end for ($i=0; $i -lt $allElements.Count; $i++) {}
+		} #end for ($i=0; $i -lt $allElements.Count; $i++) {}
 
-	$allElements = $null
-	$allElements = $allElementsNoVis
+		$allElements = $null
+		$allElements = $allElementsVis
 
-} #end  ($query.value.count -gt 1) 
+	} 	#end if ($addVisualizationFlag -ieq 'True')
+
+} elseif  ($elementCount -eq 1) {
+	
+	$foo = 'bar, just keeping allElements'
+
+} #end  if ($elementCount -gt 1)
 
 
 
@@ -916,9 +1449,9 @@ if ($Error) {
 			$rtnMsg += " Error No $l $($Error[$l]) " 
 		}
 	}
-	$api.LogScriptEvent('Get-MSGraphData.ps1',607,1,$rtnMsg)
+	$api.LogScriptEvent('Get-MSO365MgmtData.ps1',807,1,$rtnMsg)
 } else {
-	$api.LogScriptEvent('Get-MSGraphData.ps1',607,4,"no error!")
+	$api.LogScriptEvent('Get-MSO365MgmtData.ps1',807,4,"no error!")
 }
 
 
@@ -1067,6 +1600,7 @@ $rtnMsg = ''
 
 if ($WebServiceUrl -match "(?i)http(s)?") {
 	$foo = 'proceed'
+	$WebServiceUrl = $WebServiceUrl -replace '&amp;','&' 
 } else {
 	$rtnMsg = 'WebService not matching URL' + $WebServiceUrl
 }
@@ -1596,6 +2130,7 @@ if ($Format -eq 'text') {
           <AddVisualizationFlag>True</AddVisualizationFlag>
           <SortDescending></SortDescending>
           <DisplayItemNumber>10</DisplayItemNumber>
+          <RefreshCycleMinutes>15</RefreshCycleMinutes>
         </WriteAction>
       </Task>
       <Task ID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.Task" Accessibility="Public" Enabled="true" Target="Windows!Microsoft.Windows.Computer" Timeout="240" Remotable="true">
@@ -1604,6 +2139,24 @@ if ($Format -eq 'text') {
           <Format>json</Format>
           <TimeoutSeconds>180</TimeoutSeconds>
           <WebServiceUrl>https://graph.microsoft.com/beta</WebServiceUrl>
+          <GraphQry></GraphQry>
+          <ClientId></ClientId>
+          <TenantId></TenantId>
+          <ClientSecret></ClientSecret>
+          <SortedBy></SortedBy>
+          <FilteredBy></FilteredBy>
+          <AddVisualizationFlag>True</AddVisualizationFlag>
+          <SortDescending></SortDescending>
+          <DisplayItemNumber>10</DisplayItemNumber>
+          <RefreshCycleMinutes>15</RefreshCycleMinutes>
+        </WriteAction>
+      </Task>
+      <Task ID="Windows.Computer.DataOnDemand.Addendum.GetMSO365MgmtData.Task" Accessibility="Public" Enabled="true" Target="Windows!Microsoft.Windows.Computer" Timeout="240" Remotable="true">
+        <Category>Operations</Category>
+        <WriteAction ID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphData.PowerShellWriteAction" TypeID="Windows.Computer.DataOnDemand.Addendum.GetMSO365MgmtData.WriteAction">
+          <Format>JSON</Format>
+          <TimeoutSeconds>180</TimeoutSeconds>
+          <WebServiceUrl>https://manage.office.com/api/v1.0/</WebServiceUrl>
           <GraphQry></GraphQry>
           <ClientId></ClientId>
           <TenantId></TenantId>
@@ -1738,6 +2291,10 @@ if ($Format -eq 'text') {
           <Name>DisplayItemNumber</Name>
           <Description>Number of items that will be displayed, default is 10</Description>
         </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphData.WriteAction" SubElementID="RefreshCycleMinutes">
+          <Name>RefreshCycleMinutes</Name>
+          <Description>Number of minutes until new query, default is 15</Description>
+        </DisplayString>
         <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.WriteAction">
           <Name>
             Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.WriteAction
@@ -1792,6 +2349,67 @@ if ($Format -eq 'text') {
           <Description>Default is False, can be set to True </Description>
         </DisplayString>
         <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.WriteAction" SubElementID="DisplayItemNumber">
+          <Name>DisplayItemNumber</Name>
+          <Description>Number of items that will be displayed, default is 10</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSGraphBetaData.WriteAction" SubElementID="RefreshCycleMinutes">
+          <Name>RefreshCycleMinutes</Name>
+          <Description>Number of minutes until new query, default is 15</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSO365MgmtData.WriteAction">
+          <Name>
+            Windows.Computer.DataOnDemand.Addendum.GetMSO365MgmtData.WriteAction
+          </Name>
+          <Description>
+            Retrieves information from MS O365 Management API.
+            Note: JSON format is only supported if PowerShell v3 or later is installed on the target server.
+          </Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSO365MgmtData.WriteAction" SubElementID="Format">
+          <Name>Output format</Name>
+          <Description>Allowed values: JSON, Text, List</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSO365MgmtData.WriteAction" SubElementID="TimeoutSeconds">
+          <Name>Timeout (Seconds)</Name>
+          <Description>Script timeout in seconds</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSO365MgmtData.WriteAction" SubElementID="WebServiceUrl">
+          <Name>URL of the MS API</Name>
+          <Description>E.g. https://graph.microsoft.com </Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSO365MgmtData.WriteAction" SubElementID="GraphQry">
+          <Name>Query to MS API</Name>
+          <Description>E.g. /ServiceComms/Message </Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSO365MgmtData.WriteAction" SubElementID="ClientId">
+          <Name>ClientId</Name>
+          <Description>Application (client) ID, needs to be taken from the AppRegistration site (see help file for more information)</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSO365MgmtData.WriteAction" SubElementID="TenantId">
+          <Name>TenantId</Name>
+          <Description>ID of your Azure Tenant, also visible on the AppRegistration page</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSO365MgmtData.WriteAction" SubElementID="ClientSecret">
+          <Name>Client Secret</Name>
+          <Description>Needs to be generated on the AppRegistration page</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSO365MgmtData.WriteAction" SubElementID="SortedBy">
+          <Name>SortedBy</Name>
+          <Description>Node that should be used to for sorting</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSO365MgmtData.WriteAction" SubElementID="FilteredBy">
+          <Name>FilteredBy</Name>
+          <Description>Filter a Node with PowerShell syntax. E.g. Element -like "*off*"</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSO365MgmtData.WriteAction" SubElementID="AddVisualizationFlag">
+          <Name>AddVisualizationFlag</Name>
+          <Description>Adds a ## (double hashtag) at the beginning of every 2nd entry so that nice formatting can be performed</Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSO365MgmtData.WriteAction" SubElementID="SortDescending">
+          <Name>SortDescending</Name>
+          <Description>Default is False, can be set to True </Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSO365MgmtData.WriteAction" SubElementID="DisplayItemNumber">
           <Name>DisplayItemNumber</Name>
           <Description>Number of items that will be displayed, default is 10</Description>
         </DisplayString>
@@ -1910,6 +2528,13 @@ if ($Format -eq 'text') {
           <Name>Get-MSGraphBetaData ( Windows Computer DataOnDemand Addendum )</Name>
           <Description>
             Retrieves information from MS Graph BETA
+            Note: JSON format is only supported if PowerShell v3 or later is installed on the target server.
+          </Description>
+        </DisplayString>
+        <DisplayString ElementID="Windows.Computer.DataOnDemand.Addendum.GetMSO365MgmtData.Task">
+          <Name>Get-MSO365MgmtData ( Windows Computer DataOnDemand Addendum )</Name>
+          <Description>
+            Retrieves information from MS O365 Mgmt API
             Note: JSON format is only supported if PowerShell v3 or later is installed on the target server.
           </Description>
         </DisplayString>

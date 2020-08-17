@@ -52,6 +52,7 @@ $rtnMsg = ''
 
 if ($WebServiceUrl -match "(?i)http(s)?") {
 	$foo = 'proceed'
+	$WebServiceUrl = $WebServiceUrl -replace '&amp;','&' 
 } else {
 	$rtnMsg = 'WebService not matching URL' + $WebServiceUrl
 }

@@ -1,12 +1,12 @@
 ﻿<#
 .SYNOPSIS
-	Retrieves information from MS Graph / MS Graph Beta
+	Retrieves information from MS O365 Management API
 .DESCRIPTION
-	Retrieves information from MS Graph / MS Graph Beta and returns JSON or CSV
+	Retrieves information from MS O365 Management API and returns JSON or CSV	
 .Notes
 	AUTHOR: Ruben Zimmermann @ruben8z
-	LASTEDIT: 2020-08-09
-	REQUIRES: PowerShell Version 4, Windows Management Foundation 4, At least Windows 7 or Windows Server 2008 R2.	
+	LASTEDIT: 2020-08-06
+	REQUIRES: PowerShell Version 5, Windows Management Foundation 4, At least Windows 10 or Windows Server 20012
 REMARK:
 This PS script comes with ABSOLUTELY NO WARRANTY; for details see gnu-gpl. This is free software, and you are welcome to redistribute it under certain conditions; see gnu-gpl for details.
 	
@@ -23,8 +23,7 @@ Param(
 	[string]$FilteredBy = '',
 	[string]$addVisualizationFlag = 'true',	
 	[string]$SortDescending = '',	
-	[string]$DisplayItemNumber = '',
-	[string]$RefreshCycleMinutes
+	[string]$DisplayItemNumber = ''	
 )
 
 #$dbgFile = 'C:\Temp\graph.log.txt'
@@ -33,48 +32,6 @@ $api = New-Object -ComObject 'MOM.ScriptAPI'
 
 $ErrorActionPreference = "stop"
 $rtnMsg = ''
-
-$cacheFilePath = "C:\Temp\GraphTmpFiles" 
-
-if ($graphQry -match '\(') { 
-  $graphQryName = ($graphQry -split '\(')[0]  
-} else {
-  $graphQryName = $graphQry
-}
-
-
-$cacheFileSuffix = $graphQryName -replace '/',''
-
-$selectCheck = $false
-
-if ($GraphQry -match '(?i)select') {
-	$qryTmp      = $GraphQry -split 'select='
-	$qryTmp      = $qryTmp[1] -split '&|$' 
-	$qryTmp      = $qryTmp[0] -replace '&|$',''
-	$qryTmp      = $qryTmp -as [string]		
-	if ($qryTmp.Substring($qryTmp.Length -1,1) -eq ',') {
-		$qryTmp = $qryTmp.Substring(0,$qryTmp.Length -1)
-	}
-	$qryTmpArr   = $qryTmp -split ','	
-	$qryTmp      = $qryTmp -replace ',',''
-	$cacheFileSuffix +=  '_' + $qryTmp
-	$selectCheck = $true
-}
-
-	
-$cacheFileName = 'Read-Graph_' + $cacheFileSuffix + '.json'
-
-if (Test-Path -Path $cacheFilePath) {
-  $foo = "directory already exists"
-} else {  
-  $tmpFil = ($cacheFilePath -split '\\')[-1]
-  $tmpDir = $cacheFilePath.Substring(0,($cacheFilePath.Length - $tmpFil.Length) -1)
-  New-Item -ItemType Directory -Path $tmpDir -Name $tmpFil -Force 
-}
-
-$cacheFile = Join-Path -Path $cacheFilePath -ChildPath $cacheFileName
-
-$runQry = $false
 
 if ($WebServiceUrl -match "(?i)http(s)?") {
 	$foo = 'proceed'
@@ -129,94 +86,41 @@ if ($DisplayItemNumber -match '\d') {
 	$rtnMsg = 'DisplayItemNumber is not a number. Invalid.' +  $DisplayItemNumber
 }
 
-if ($SortDescending -match '(?i)true|false|$true|$false') {
-	$foo = 'bar'
-} else {
-	$rtnMsg = 'SortDescindg value is invalid.' +  $SortDescending
-}
+$api.LogScriptEvent('Get-MSO365MgmtData.ps1',802,1,"URL $($WebServiceUrl), TenantID $($TenantId) ClientID $($ClientId) FilteredBy $($FilteredBy) Sortedby $($SortedBy) GraphQry $($GraphQry)")
 
-if ($RefreshCycleMinutes -match '\d') {
-	$foo = 'bar'
-} else {
-	$rtnMsg = 'RefreshCycleMinutes is not a number. Invalid.' +  $RefreshCycleMinutes
-}
-
-if ([System.IO.File]::Exists($cacheFile)) {
-  $cacheFileObj = Get-Item -Path $cacheFile
-  $cacheFileLwt = $cacheFileObj.LastWriteTime 
-  $timeDiff = (New-TimeSpan -Start $cacheFileLwt -End (Get-date)).TotalMinutes -as [int]
-  if ($timeDiff -gt $RefreshCycleMinutes) {
-	$runQry = $true
-  } else {
-	$runQry = $false
-  }
-} else {
-  $runQry = $true
-}
-
-
-$api.LogScriptEvent('Get-MSGraphData.ps1',602,1,"URL $($WebServiceUrl), TenantID $($TenantId) ClientID $($ClientId) FilteredBy $($FilteredBy) Sortedby $($SortedBy) GraphQry $($GraphQry)")
-
-# Construct URI
-$uri = "https://login.microsoftonline.com/$TenantId/oauth2/v2.0/token"
-
-# Construct Body
 $body = @{
-	client_id     = $ClientId
-	scope         = "https://graph.microsoft.com/.default"
-	client_secret = $ClientSecret
-	grant_type    = "client_credentials"
+  grant_type    = "client_credentials"
+  resource      = "https://manage.office.com"
+  client_id     = $clientId
+  client_secret = $clientSecret
 }
 
-# Get OAuth 2.0 Token
-$tokenRequest = Invoke-WebRequest -Method Post -Uri $uri -ContentType "application/x-www-form-urlencoded" -Body $body -UseBasicParsing
+$uri = $WebServiceUrl + $TenantId + $GraphQry
 
-# Access Token
-$token  = ($tokenRequest.Content | ConvertFrom-Json).access_token
+$api.LogScriptEvent('Get-MSO365MgmtData.ps1',802,2,"Qury URL: $($uri)")
 
-$uri = $WebServiceUrl + $GraphQry	
+try {	
+	$oauth = Invoke-RestMethod -Method Post -Uri "https://login.microsoftonline.com/$($tenantID)/oauth2/token?api-version=1.0" -Body $body -UseBasicParsing
+	$token = @{'Authorization' = "$($oauth.token_type) $($oauth.access_token)" }
 
-#"165"| Out-File -FilePath $dbgFile -Append
-#$uri  | Out-File -FilePath $dbgFile -Append
+	$query = Invoke-RestMethod -Uri $uri -Headers $token -Method Get
 
-$api.LogScriptEvent('Get-MSGraphData.ps1',602,2,"Qury URL: $($uri)")
-
-if ($runQry) {
-
-	try {	
-		$query = Invoke-RestMethod -Method Get -Uri $uri -ContentType "application/json" -Headers @{Authorization = "Bearer $token"} -ErrorAction Stop -UseBasicParsing 
-	} catch {	
-		$rtnMsg  = 'Failure during InvokeWebRequest  ' + $Error
-		$rtnMsg += 'URI: ' + $uri 
-	}
-  
-	$query = $query.value
-
-	if ($selectCheck) {
-		$query | Select-Object -Property $qryTmpArr | ConvertTo-Json | Out-File -FilePath $cacheFile -Force 
-	} else {
-		$query | ConvertTo-Json | Out-File -FilePath $cacheFile -Force 
-	}		
-
-} else {
-
-  $query =  Get-Content -Path $cacheFile | ConvertFrom-Json
-  
-} #end if($runQry)
+} catch {	
+	$rtnMsg  = 'Failure during InvokeWebRequest  ' + $Error
+	$rtnMsg += 'URI: ' + $uri 
+}
 
 
-#$query  | Out-File -FilePath $dbgFile -Append
-
-$api.LogScriptEvent('Get-MSGraphData.ps1',606,1,"rtnMsg $($rtnMsg)")
+#$api.LogScriptEvent('Get-MSO365MgmtData.ps1',806,1,"rtnMsg $($rtnMsg)")
 
 $allElements = New-Object -TypeName 'System.Collections.Generic.List[PSObject]'
 
 $elementCount = 0
-$elementCount = $query.count
+$elementCount = $query.value.count
 
-$query | ForEach-Object { $allElements.Add($_) }
+$query.value  | ForEach-Object { $allElements.Add($_) }
 
-$api.LogScriptEvent('Get-MSGraphData.ps1',602,1,"Answ Value $($query.count) ")
+#$api.LogScriptEvent('Get-MSO365MgmtData.ps1',802,1,"Answ Value $($query.value.count) ")
 
 if ($elementCount -gt 1) {
 
@@ -227,9 +131,9 @@ if ($elementCount -gt 1) {
 			$FilterFor = $ExecutionContext.InvokeCommand.NewScriptBlock($FilteredBy)				
 			$allElements = $allElements | Where-Object -FilterScript $FilterFor
 			$FilteredNumber = $allElements.Count
-			$api.LogScriptEvent('Get-MSGraphData.ps1',603,2,"regex passed for $FilteredBy")
+#			$api.LogScriptEvent('Get-MSO365MgmtData.ps1',603,2,"regex passed for $FilteredBy")
 		} else {
-			$api.LogScriptEvent('Get-MSGraphData.ps1',603,2,"regex NOT passed for $FilteredBy")
+			$api.LogScriptEvent('Get-MSO365MgmtData.ps1',603,2,"regex NOT passed for $FilteredBy")
 		}
 	}
 
@@ -330,9 +234,9 @@ if ($Error) {
 			$rtnMsg += " Error No $l $($Error[$l]) " 
 		}
 	}
-	$api.LogScriptEvent('Get-MSGraphData.ps1',607,1,$rtnMsg)
+	$api.LogScriptEvent('Get-MSO365MgmtData.ps1',807,1,$rtnMsg)
 } else {
-	$api.LogScriptEvent('Get-MSGraphData.ps1',607,4,"no error!")
+	$api.LogScriptEvent('Get-MSO365MgmtData.ps1',807,4,"no error!")
 }
 
 

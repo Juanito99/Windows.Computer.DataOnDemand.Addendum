@@ -1,19 +1,19 @@
 ﻿<#
 .SYNOPSIS
-    Get Compupter Description
+	Get Compupter Description
 .DESCRIPTION
-    This script gets the local description and the one from Active Directory
+	This script gets the local description and the one from Active Directory
 .Notes
 	AUTHOR: Ruben Zimmermann @ruben8z
 	LASTEDIT: 2019-12-25
 	REQUIRES: PowerShell Version 2, Windows Management Foundation 4, At least Windows 7 or Windows Server 2008 R2.	
 REMARK:
 This PS script comes with ABSOLUTELY NO WARRANTY; for details see gnu-gpl. This is free software, and you are welcome to redistribute it under certain conditions; see gnu-gpl for details.
-    
+	
 #>
 Param(
-    [ValidateSet("text","csv","json", "list")]
-    [string] $Format = "csv"
+	[ValidateSet("text","csv","json", "list")]
+	[string] $Format = "csv"
 )
 
 
@@ -69,11 +69,11 @@ $myComputerDescObj = New-Object -TypeName PSObject -Property $myComputerDescHash
 if ($Format -eq 'text') {
 	$myComputerDescObj | Format-Table -AutoSize | Out-String -Width 4096 | Write-Host
 } elseif ($Format -eq 'csv') {
-    $myComputerDescObj | ConvertTo-Csv -NoTypeInformation | Out-String -Width 4096 | Write-Host
+	$myComputerDescObj | ConvertTo-Csv -NoTypeInformation | Out-String -Width 4096 | Write-Host
 } elseif ($Format -eq 'json') {
-    $myComputerDescObj | ConvertTo-Json | Out-String -Width 4096 | Write-Host
+	$myComputerDescObj | ConvertTo-Json | Out-String -Width 4096 | Write-Host
 } elseif ($format -eq 'list') {
-    $myComputerDescObj | Format-List | Out-String -Width 4096 | Write-Host
+	$myComputerDescObj | Format-List | Out-String -Width 4096 | Write-Host
 }
 
 # Done. (do not remove blank line following this comment as it can cause problems when script is sent to SCOM agent!)
