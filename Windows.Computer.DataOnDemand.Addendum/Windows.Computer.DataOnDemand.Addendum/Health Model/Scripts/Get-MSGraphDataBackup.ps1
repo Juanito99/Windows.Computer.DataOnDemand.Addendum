@@ -43,11 +43,10 @@ if ($graphQry -match '\(') {
 }
 
 
-#$cacheFileSuffix = $graphQryName -replace '/',''
+$cacheFileSuffix = $graphQryName -replace '/',''
 
-#$selectCheck = $false
+$selectCheck = $false
 
-<#
 if ($GraphQry -match '(?i)select') {
 	$qryTmp      = $GraphQry -split 'select='
 	$qryTmp      = $qryTmp[1] -split '&|$' 
@@ -74,9 +73,8 @@ if (Test-Path -Path $cacheFilePath) {
 }
 
 $cacheFile = Join-Path -Path $cacheFilePath -ChildPath $cacheFileName
-#>
 
-$runQry = $true
+$runQry = $false
 
 if ($WebServiceUrl -match "(?i)http(s)?") {
 	$foo = 'proceed'
@@ -143,7 +141,6 @@ if ($RefreshCycleMinutes -match '\d') {
 	$rtnMsg = 'RefreshCycleMinutes is not a number. Invalid.' +  $RefreshCycleMinutes
 }
 
-<#
 if ([System.IO.File]::Exists($cacheFile)) {
   $cacheFileObj = Get-Item -Path $cacheFile
   $cacheFileLwt = $cacheFileObj.LastWriteTime 
@@ -156,7 +153,7 @@ if ([System.IO.File]::Exists($cacheFile)) {
 } else {
   $runQry = $true
 }
-#>
+
 
 $api.LogScriptEvent('Get-MSGraphData.ps1',602,1,"URL $($WebServiceUrl), TenantID $($TenantId) ClientID $($ClientId) FilteredBy $($FilteredBy) Sortedby $($SortedBy) GraphQry $($GraphQry)")
 
@@ -184,7 +181,6 @@ $uri = $WebServiceUrl + $GraphQry
 
 $api.LogScriptEvent('Get-MSGraphData.ps1',602,2,"Qury URL: $($uri)")
 
-<#
 if ($runQry) {
 
 	try {	
@@ -210,54 +206,6 @@ if ($runQry) {
 
 
 #$query  | Out-File -FilePath $dbgFile -Append
-#>
-	
-
- $QueryResults = @()
-
-if ($runQry) {
-
-	try {
-
-		do { 
-			
-			$query = Invoke-RestMethod -Method Get -Uri $uri -ContentType "application/json" -Headers @{Authorization = "Bearer $token"} -ErrorAction Stop -UseBasicParsing 
-		
-			if ($query.value) {
-				$QueryResults += $query.value
-			} else {
-				$QueryResults += $query
-			}
-
-			$uri = $query.'@odata.nextlink'     
-
-		}  until (!($uri))
-
-		<#
-		if ($selectCheck) {
-			$QueryResults | Select-Object -Property $qryTmpArr | ConvertTo-Json | Out-File -FilePath $cacheFile -Force 
-		} else {
-			$QueryResults | ConvertTo-Json | Out-File -FilePath $cacheFile -Force 
-		}
-		#>
-
-	 } catch {
-
-			$rtnMsg  = 'Failure during InvokeWebRequest  ' + $Error
-			$rtnMsg += 'URI: ' + $uri 
-
-	 } #end try 
-	
-	#$QueryResults | ConvertTo-Json | Out-File -FilePath $cacheFile -Force 
-	$query = $QueryResults
-
-} else {
-
-	$foo = 'bar'
-  #$query =  Get-Content -Path $cacheFile | ConvertFrom-Json
-  
-}
-
 
 $api.LogScriptEvent('Get-MSGraphData.ps1',606,1,"rtnMsg $($rtnMsg)")
 

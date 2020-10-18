@@ -3,7 +3,7 @@
   <Manifest>
     <Identity>
       <ID>Windows.Computer.DataOnDemand.Addendum</ID>
-      <Version>1.0.0.181</Version>
+      <Version>1.0.0.195</Version>
     </Identity>
     <Name>Windows.Computer.DataOnDemand.Addendum</Name>
     <References>
@@ -42,8 +42,8 @@
 	This script gets the local description and the one from Active Directory
 .Notes
 	AUTHOR: Ruben Zimmermann @ruben8z
-	LASTEDIT: 2019-12-25
-	REQUIRES: PowerShell Version 2, Windows Management Foundation 4, At least Windows 7 or Windows Server 2008 R2.	
+	LASTEDIT: 2020-09-30
+	REQUIRES: PowerShell Version 4, Windows Management Foundation 4, At least Windows 7 or Windows Server 2008 R2.	
 REMARK:
 This PS script comes with ABSOLUTELY NO WARRANTY; for details see gnu-gpl. This is free software, and you are welcome to redistribute it under certain conditions; see gnu-gpl for details.
 	
@@ -98,9 +98,35 @@ if (([string]::IsNullOrEmpty($myComputerInWhenCreated))) {
 	$myComputerInWhenCreated = $myComputerInWhenCreated.Trim()
 }
 
-$myComputerDescHash = @{'Local Computer Description' = $computerDescription}
-$myComputerDescHash.Add('AD Computer Description', $myComputerInADDescritpion)
-$myComputerDescHash.Add('AD Computer CreationDate', $myComputerInWhenCreated)
+try {
+	$myMemoryInGB = ((get-wmiobject -class "win32_physicalmemory" -namespace "root\CIMV2"  | Measure-Object -Property capacity -Sum) | Select-Object -ExpandProperty Sum) / 1GB
+	$myMemoryInGB = $myMemoryInGB.ToString() + ' GB'
+} catch {
+	$myMemoryInGB = 'N/A'
+}
+
+try {
+	$myCPUName    = Get-WmiObject -Class Win32_Processor | Select-Object -ExpandProperty Name
+	$tmpCoreCount = (Get-WmiObject -Class Win32_Processor | Select-Object -ExpandProperty NumberOfCores).count
+	
+	if ($tmpCoreCount -gt 1) {
+		$myCPUNoCores = ((Get-WmiObject -Class Win32_Processor | Select-Object -Property Name, NumberOfCores) | Select-Object -ExpandProperty NumberOfCores) -join ' / '
+	} else {
+		$myCPUNoCores = (Get-WmiObject -Class Win32_Processor | Select-Object -Property Name, NumberOfCores) | Select-Object -ExpandProperty NumberOfCores
+	}
+} catch {
+	$myCPUName    = 'N/A'
+	$myCPUNoCores = 'N/A'
+}
+
+
+$myComputerDescHash = @{'Local Info' = $computerDescription}
+$myComputerDescHash.Add('AD Info', $myComputerInADDescritpion)
+$myComputerDescHash.Add('AD Creation', $myComputerInWhenCreated)
+$myComputerDescHash.Add('RAM Size', $myMemoryInGB)
+$myComputerDescHash.Add('CPU Name', $myCPUName)
+$myComputerDescHash.Add('CPU Cores', $myCPUNoCores)
+
 $myComputerDescObj = New-Object -TypeName PSObject -Property $myComputerDescHash
 
 if ($Format -eq 'text') {
@@ -153,7 +179,7 @@ if ($Format -eq 'text') {
 	This script gets some last changes such as last installed SW or logged on user.
 .Notes
 	AUTHOR: Ruben Zimmermann @ruben8z
-	LASTEDIT: 2019-12-25
+	LASTEDIT: 2020-09-30
 	REQUIRES: PowerShell Version 2, Windows Management Foundation 4, At least Windows 7 or Windows Server 2008 R2.	
 REMARK:
 This PS script comes with ABSOLUTELY NO WARRANTY; for details see gnu-gpl. This is free software, and you are welcome to redistribute it under certain conditions; see gnu-gpl for details.
@@ -267,10 +293,10 @@ try {
 }
 
 
-$myComputerDescHash = @{'Last Boot / UpTime (days)' = $($lastBootTime + ' / ' + $UpTimeInDays)}
-$myComputerDescHash.Add('Last Interactive Logon', $($lastLoggedOnUserId + ' / ' + $lastLoggedOnUserDate))
-$myComputerDescHash.Add('Last Software Install', $($lastInstalledSoftwareName + ' / ' + $lastInstalledSoftwareInstallDate))
-$myComputerDescHash.Add('Last Hotfix Install', $($lastInstalledHotfixName + ' / ' + $lastInstalledHotfixInstallDate))
+$myComputerDescHash = @{'Boot / UpTime (days)' = $($lastBootTime + ' / ' + $UpTimeInDays)}
+$myComputerDescHash.Add('Last Logon', $($lastLoggedOnUserId + ' / ' + $lastLoggedOnUserDate))
+$myComputerDescHash.Add('Last SW Install', $($lastInstalledSoftwareName + ' / ' + $lastInstalledSoftwareInstallDate))
+$myComputerDescHash.Add('Last KB Install', $($lastInstalledHotfixName + ' / ' + $lastInstalledHotfixInstallDate))
 $myComputerDescHash.Add('Patch-Boot pending', $($patchBootPending))
 
 $myComputerDescObj = New-Object -TypeName PSObject -Property $myComputerDescHash
@@ -386,10 +412,11 @@ if ($graphQry -match '\(') {
 }
 
 
-$cacheFileSuffix = $graphQryName -replace '/',''
+#$cacheFileSuffix = $graphQryName -replace '/',''
 
-$selectCheck = $false
+#$selectCheck = $false
 
+<#
 if ($GraphQry -match '(?i)select') {
 	$qryTmp      = $GraphQry -split 'select='
 	$qryTmp      = $qryTmp[1] -split '&|$' 
@@ -416,8 +443,9 @@ if (Test-Path -Path $cacheFilePath) {
 }
 
 $cacheFile = Join-Path -Path $cacheFilePath -ChildPath $cacheFileName
+#>
 
-$runQry = $false
+$runQry = $true
 
 if ($WebServiceUrl -match "(?i)http(s)?") {
 	$foo = 'proceed'
@@ -484,6 +512,7 @@ if ($RefreshCycleMinutes -match '\d') {
 	$rtnMsg = 'RefreshCycleMinutes is not a number. Invalid.' +  $RefreshCycleMinutes
 }
 
+<#
 if ([System.IO.File]::Exists($cacheFile)) {
   $cacheFileObj = Get-Item -Path $cacheFile
   $cacheFileLwt = $cacheFileObj.LastWriteTime 
@@ -496,7 +525,7 @@ if ([System.IO.File]::Exists($cacheFile)) {
 } else {
   $runQry = $true
 }
-
+#>
 
 $api.LogScriptEvent('Get-MSGraphData.ps1',602,1,"URL $($WebServiceUrl), TenantID $($TenantId) ClientID $($ClientId) FilteredBy $($FilteredBy) Sortedby $($SortedBy) GraphQry $($GraphQry)")
 
@@ -524,6 +553,7 @@ $uri = $WebServiceUrl + $GraphQry
 
 $api.LogScriptEvent('Get-MSGraphData.ps1',602,2,"Qury URL: $($uri)")
 
+<#
 if ($runQry) {
 
 	try {	
@@ -549,6 +579,54 @@ if ($runQry) {
 
 
 #$query  | Out-File -FilePath $dbgFile -Append
+#>
+	
+
+ $QueryResults = @()
+
+if ($runQry) {
+
+	try {
+
+		do { 
+			
+			$query = Invoke-RestMethod -Method Get -Uri $uri -ContentType "application/json" -Headers @{Authorization = "Bearer $token"} -ErrorAction Stop -UseBasicParsing 
+		
+			if ($query.value) {
+				$QueryResults += $query.value
+			} else {
+				$QueryResults += $query
+			}
+
+			$uri = $query.'@odata.nextlink'     
+
+		}  until (!($uri))
+
+		<#
+		if ($selectCheck) {
+			$QueryResults | Select-Object -Property $qryTmpArr | ConvertTo-Json | Out-File -FilePath $cacheFile -Force 
+		} else {
+			$QueryResults | ConvertTo-Json | Out-File -FilePath $cacheFile -Force 
+		}
+		#>
+
+	 } catch {
+
+			$rtnMsg  = 'Failure during InvokeWebRequest  ' + $Error
+			$rtnMsg += 'URI: ' + $uri 
+
+	 } #end try 
+	
+	#$QueryResults | ConvertTo-Json | Out-File -FilePath $cacheFile -Force 
+	$query = $QueryResults
+
+} else {
+
+	$foo = 'bar'
+  #$query =  Get-Content -Path $cacheFile | ConvertFrom-Json
+  
+}
+
 
 $api.LogScriptEvent('Get-MSGraphData.ps1',606,1,"rtnMsg $($rtnMsg)")
 
@@ -823,10 +901,11 @@ if ($graphQry -match '\(') {
 }
 
 
-$cacheFileSuffix = $graphQryName -replace '/',''
+#$cacheFileSuffix = $graphQryName -replace '/',''
 
-$selectCheck = $false
+#$selectCheck = $false
 
+<#
 if ($GraphQry -match '(?i)select') {
 	$qryTmp      = $GraphQry -split 'select='
 	$qryTmp      = $qryTmp[1] -split '&|$' 
@@ -853,8 +932,9 @@ if (Test-Path -Path $cacheFilePath) {
 }
 
 $cacheFile = Join-Path -Path $cacheFilePath -ChildPath $cacheFileName
+#>
 
-$runQry = $false
+$runQry = $true
 
 if ($WebServiceUrl -match "(?i)http(s)?") {
 	$foo = 'proceed'
@@ -921,6 +1001,7 @@ if ($RefreshCycleMinutes -match '\d') {
 	$rtnMsg = 'RefreshCycleMinutes is not a number. Invalid.' +  $RefreshCycleMinutes
 }
 
+<#
 if ([System.IO.File]::Exists($cacheFile)) {
   $cacheFileObj = Get-Item -Path $cacheFile
   $cacheFileLwt = $cacheFileObj.LastWriteTime 
@@ -933,7 +1014,7 @@ if ([System.IO.File]::Exists($cacheFile)) {
 } else {
   $runQry = $true
 }
-
+#>
 
 $api.LogScriptEvent('Get-MSGraphData.ps1',602,1,"URL $($WebServiceUrl), TenantID $($TenantId) ClientID $($ClientId) FilteredBy $($FilteredBy) Sortedby $($SortedBy) GraphQry $($GraphQry)")
 
@@ -961,6 +1042,7 @@ $uri = $WebServiceUrl + $GraphQry
 
 $api.LogScriptEvent('Get-MSGraphData.ps1',602,2,"Qury URL: $($uri)")
 
+<#
 if ($runQry) {
 
 	try {	
@@ -986,6 +1068,54 @@ if ($runQry) {
 
 
 #$query  | Out-File -FilePath $dbgFile -Append
+#>
+	
+
+ $QueryResults = @()
+
+if ($runQry) {
+
+	try {
+
+		do { 
+			
+			$query = Invoke-RestMethod -Method Get -Uri $uri -ContentType "application/json" -Headers @{Authorization = "Bearer $token"} -ErrorAction Stop -UseBasicParsing 
+		
+			if ($query.value) {
+				$QueryResults += $query.value
+			} else {
+				$QueryResults += $query
+			}
+
+			$uri = $query.'@odata.nextlink'     
+
+		}  until (!($uri))
+
+		<#
+		if ($selectCheck) {
+			$QueryResults | Select-Object -Property $qryTmpArr | ConvertTo-Json | Out-File -FilePath $cacheFile -Force 
+		} else {
+			$QueryResults | ConvertTo-Json | Out-File -FilePath $cacheFile -Force 
+		}
+		#>
+
+	 } catch {
+
+			$rtnMsg  = 'Failure during InvokeWebRequest  ' + $Error
+			$rtnMsg += 'URI: ' + $uri 
+
+	 } #end try 
+	
+	#$QueryResults | ConvertTo-Json | Out-File -FilePath $cacheFile -Force 
+	$query = $QueryResults
+
+} else {
+
+	$foo = 'bar'
+  #$query =  Get-Content -Path $cacheFile | ConvertFrom-Json
+  
+}
+
 
 $api.LogScriptEvent('Get-MSGraphData.ps1',606,1,"rtnMsg $($rtnMsg)")
 

@@ -5,7 +5,7 @@
 	This script gets some last changes such as last installed SW or logged on user.
 .Notes
 	AUTHOR: Ruben Zimmermann @ruben8z
-	LASTEDIT: 2019-12-25
+	LASTEDIT: 2020-09-30
 	REQUIRES: PowerShell Version 2, Windows Management Foundation 4, At least Windows 7 or Windows Server 2008 R2.	
 REMARK:
 This PS script comes with ABSOLUTELY NO WARRANTY; for details see gnu-gpl. This is free software, and you are welcome to redistribute it under certain conditions; see gnu-gpl for details.
@@ -119,10 +119,10 @@ try {
 }
 
 
-$myComputerDescHash = @{'Last Boot / UpTime (days)' = $($lastBootTime + ' / ' + $UpTimeInDays)}
-$myComputerDescHash.Add('Last Interactive Logon', $($lastLoggedOnUserId + ' / ' + $lastLoggedOnUserDate))
-$myComputerDescHash.Add('Last Software Install', $($lastInstalledSoftwareName + ' / ' + $lastInstalledSoftwareInstallDate))
-$myComputerDescHash.Add('Last Hotfix Install', $($lastInstalledHotfixName + ' / ' + $lastInstalledHotfixInstallDate))
+$myComputerDescHash = @{'Boot / UpTime (days)' = $($lastBootTime + ' / ' + $UpTimeInDays)}
+$myComputerDescHash.Add('Last Logon', $($lastLoggedOnUserId + ' / ' + $lastLoggedOnUserDate))
+$myComputerDescHash.Add('Last SW Install', $($lastInstalledSoftwareName + ' / ' + $lastInstalledSoftwareInstallDate))
+$myComputerDescHash.Add('Last KB Install', $($lastInstalledHotfixName + ' / ' + $lastInstalledHotfixInstallDate))
 $myComputerDescHash.Add('Patch-Boot pending', $($patchBootPending))
 
 $myComputerDescObj = New-Object -TypeName PSObject -Property $myComputerDescHash

@@ -5,8 +5,8 @@
 	This script gets the local description and the one from Active Directory
 .Notes
 	AUTHOR: Ruben Zimmermann @ruben8z
-	LASTEDIT: 2019-12-25
-	REQUIRES: PowerShell Version 2, Windows Management Foundation 4, At least Windows 7 or Windows Server 2008 R2.	
+	LASTEDIT: 2020-09-30
+	REQUIRES: PowerShell Version 4, Windows Management Foundation 4, At least Windows 7 or Windows Server 2008 R2.	
 REMARK:
 This PS script comes with ABSOLUTELY NO WARRANTY; for details see gnu-gpl. This is free software, and you are welcome to redistribute it under certain conditions; see gnu-gpl for details.
 	
@@ -61,9 +61,35 @@ if (([string]::IsNullOrEmpty($myComputerInWhenCreated))) {
 	$myComputerInWhenCreated = $myComputerInWhenCreated.Trim()
 }
 
-$myComputerDescHash = @{'Local Computer Description' = $computerDescription}
-$myComputerDescHash.Add('AD Computer Description', $myComputerInADDescritpion)
-$myComputerDescHash.Add('AD Computer CreationDate', $myComputerInWhenCreated)
+try {
+	$myMemoryInGB = ((get-wmiobject -class "win32_physicalmemory" -namespace "root\CIMV2"  | Measure-Object -Property capacity -Sum) | Select-Object -ExpandProperty Sum) / 1GB
+	$myMemoryInGB = $myMemoryInGB.ToString() + ' GB'
+} catch {
+	$myMemoryInGB = 'N/A'
+}
+
+try {
+	$myCPUName    = Get-WmiObject -Class Win32_Processor | Select-Object -ExpandProperty Name
+	$tmpCoreCount = (Get-WmiObject -Class Win32_Processor | Select-Object -ExpandProperty NumberOfCores).count
+	
+	if ($tmpCoreCount -gt 1) {
+		$myCPUNoCores = ((Get-WmiObject -Class Win32_Processor | Select-Object -Property Name, NumberOfCores) | Select-Object -ExpandProperty NumberOfCores) -join ' / '
+	} else {
+		$myCPUNoCores = (Get-WmiObject -Class Win32_Processor | Select-Object -Property Name, NumberOfCores) | Select-Object -ExpandProperty NumberOfCores
+	}
+} catch {
+	$myCPUName    = 'N/A'
+	$myCPUNoCores = 'N/A'
+}
+
+
+$myComputerDescHash = @{'Local Info' = $computerDescription}
+$myComputerDescHash.Add('AD Info', $myComputerInADDescritpion)
+$myComputerDescHash.Add('AD Creation', $myComputerInWhenCreated)
+$myComputerDescHash.Add('RAM Size', $myMemoryInGB)
+$myComputerDescHash.Add('CPU Name', $myCPUName)
+$myComputerDescHash.Add('CPU Cores', $myCPUNoCores)
+
 $myComputerDescObj = New-Object -TypeName PSObject -Property $myComputerDescHash
 
 if ($Format -eq 'text') {
